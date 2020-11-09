@@ -553,7 +553,6 @@ if __name__ == "__main__":
     boom.searchTreeDelete(27)
     boom.searchTreeInsert(createTreeItem(27))
 
-    boom.clear()
     boom.toDot()
 
 # # Inginious testing
