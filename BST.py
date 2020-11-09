@@ -103,7 +103,7 @@ class BST:
 
     def print(self, depth=0, node=None, start=True):
         """
-        Print de binaire zoekboom op het scherm.
+        Print de binaire zoekboom in de console.
         :return: None
         """
         if start:
@@ -146,7 +146,6 @@ class BST:
 
             # Maak een dot object
             name = f"tree" # f"tree{self.id}"
-            print(name)
             dot = Graph(comment=name, format='png', graph_attr={"splines": "false"})
 
         if not print_value:
@@ -233,7 +232,7 @@ class BST:
         # Zet in het begin de current_node gelijk aan die van de root
         if start:
             key, newEntry = t[0], t[1]
-            # Als de binaire boom leeg is add the item in de root
+            # Als de binaire boom leeg is insert het item in de root
             if self.root is None:
                 self.root = BSTNode(key, newEntry)
                 return True
@@ -420,7 +419,7 @@ class BST:
 
     def searchTreeRetrieve(self, key):
         """
-        Geeft een specifieke waarde terug uit de binaire zoekboom mbv de searchkey.
+        Geeft een waarde terug uit de binaire zoekboom mbv de searchkey.
         :param key: search key (int of string)
         :return: waarde
         """
