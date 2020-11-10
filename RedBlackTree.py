@@ -77,35 +77,35 @@ class RBTNode:
         self.switchColor()
 
     def leftRotate(self):
-        child = self.right
-        parent = self.parent
-        if parent is not None:
+        A = self.right # A = child of self
+        B = self.parent # B = parent of self
+        if B is not None:
             if self.isLeftChild():
-                parent.left = child
+                B.left = A
             else:
-                parent.right = child
-        child.parent = parent
-        self.parent = child
+                B.right = A
+        A.parent = B
+        self.parent = A
 
-        temp = child.left
-        child.left = self
+        temp = A.left
+        A.left = self
         self.right = temp
         if temp is not None:
             self.right.parent = self.right
 
     def rightRotate(self):
-        child = self.left
-        parent = self.parent
-        if parent is not None:
+        A = self.left # A = child of self
+        B = self.parent # B = parent of self
+        if B is not None:
             if self.isLeftChild():
-                parent.left = child
+                B.left = A
             else:
-                parent.right = child
-        child.parent = parent
-        self.parent = child
+                B.right = A
+        A.parent = B
+        self.parent = A
 
-        temp = child.right
-        child.right = self
+        temp = A.right
+        A.right = self
         self.left = temp
         if temp is not None:
             self.left.parent = self.left
@@ -378,13 +378,11 @@ class RedBlackTree:
                     # Als de ouder rood is moet die een rotatie doen
                     if current_node.parent.color == "red":
 
-
-                        # hier is le problemo
-
                         # Als current_node en ouder linkerkinderen zijn
                         if current_node.isLeftChild() and current_node.parent.isLeftChild():
                             temp = current_node.parent.parent
                             temp.left = current_node.parent.right
+                            temp.left.parent = temp
                             greatgreatparent = current_node.parent.parent.parent
                             greatparent = current_node.parent.parent
                             if greatgreatparent is None:
@@ -407,6 +405,7 @@ class RedBlackTree:
                         elif current_node.isRightChild() and current_node.parent.isRightChild():
                             temp = current_node.parent.parent
                             temp.right = current_node.parent.left
+                            temp.right.parent = temp
                             greatgreatparent = current_node.parent.parent.parent
                             greatparent = current_node.parent.parent
                             if greatgreatparent is None:
@@ -427,11 +426,6 @@ class RedBlackTree:
 
                         # Als current_node linkerkind is en ouder rechterkind
                         elif current_node.isLeftChild() and current_node.parent.isRightChild():
-
-                            # This one here
-
-
-
                             tempchild1 = current_node.left
                             tempchild2 = current_node.right
 
@@ -453,8 +447,6 @@ class RedBlackTree:
                             current_node.left.parent = current_node
                             current_node.left.right = tempchild1
                             current_node.left.right.parent = current_node.left
-                            # print("current_node.right: ", current_node.right.key)
-                            # current_node.right.switchColor()
 
                             current_node.right = parent
                             current_node.right.parent = current_node
@@ -464,9 +456,6 @@ class RedBlackTree:
                             tempchild1.switchColor()
                             tempchild2.switchColor()
                             current_node.left.switchColor()
-                            # print("current_node.right: ", current_node.right.key)
-                            # print("tempchild1: ", tempchild1.key)
-                            # print("tempchild2: ", tempchild2.key)
 
                         # Als current_node rechterkind is en ouder linkerkind
                         elif current_node.isRightChild() and current_node.parent.isLeftChild():
@@ -486,7 +475,6 @@ class RedBlackTree:
                             elif greatparent.isRightChild():
                                 greatgreatparent.right = current_node
                                 current_node.parent = greatgreatparent
-
 
                             current_node.right = greatparent
                             current_node.right.parent = current_node
@@ -512,7 +500,6 @@ class RedBlackTree:
                 new_node = current_node.left
 
                 if current_node.color == "red" and new_node.color == "red":
-                    temp = current_node
                     if current_node.isLeftChild():
 
                         current_node.parent.rightRotate()
@@ -530,16 +517,6 @@ class RedBlackTree:
                         current_node.left.switchColor()
                         if current_node.parent is None:
                             self.root = current_node
-
-                        # current_node.parent.parent.leftRotate()
-                        #
-                        # current_node.parent.switchColor()
-                        # current_node.parent.left.switchColor()
-
-                    # current_node.parent.parent.leftRotate()
-                    # print(current_node.key)
-
-
             else:
                 self.insertItem(None, key, value, current_node.left, False)
         else:
@@ -548,7 +525,6 @@ class RedBlackTree:
                 new_node = current_node.right
 
                 if current_node.color == "red" and new_node.color == "red":
-                    temp = current_node
                     if current_node.isRightChild():
                         current_node.parent.leftRotate()
 
@@ -558,17 +534,13 @@ class RedBlackTree:
                             self.root = current_node
                     else:
                         current_node.leftRotate()
-                        current_node.parent.parent.rightRotate()
+                        current_node = current_node.parent
+                        current_node.parent.rightRotate()
 
-                        current_node.parent.switchColor()
-                        current_node.parent.right.switchColor()
+                        current_node.switchColor()
+                        current_node.right.switchColor()
                         if current_node.parent is None:
                             self.root = current_node
-                    # current_node.parent.parent.rightRotate()
-                    # print(current_node.key)
-
-
-
             else:
                 self.insertItem(None, key, value, current_node.right, False)
 
@@ -631,7 +603,7 @@ class RedBlackTree:
     def contains(self, data, node=None, start=True):
         """
         Bepaalt of dat de gegeven waarde in de boom zit.
-        :param key: searchkey
+        :param data: waarde
         :return: boolean
         """
         if start:
@@ -727,43 +699,67 @@ class RedBlackTree:
         print(current_node.key)
 
     def check(self, current_node=None, start=True):
+        """
+        Kijkt na of dat de rood-zwartboom correct is
+        :return: Aantal zwarte knopen op 1 pad
+        """
+        # Zet in het begin de current_node gelijk aan die van de root
         if start:
+            if self.root is None:
+                print("---De boom is leeg---")
+                return
+            current_node = self.root
+            # Check of dat de root geen ouder heeft
+            if current_node.parent is not None:
+                print("---Root heeft een ouder!---")
 
+        else:
+            # Kijk na of dat de node een ouder heeft
+            if current_node.parent is None:
+                print(f"---{current_node.key} heeft geen ouder!---")
+            else:
+                if current_node.isLeftChild():
+                    if current_node.parent.left != current_node:
+                        print(f"---Ouder van {current_node.key} is niet juist of ouder zijn kind is niet juist!---")
+                else:
+                    if current_node.parent.right != current_node:
+                        print(f"---Ouder van {current_node.key} is niet juist of ouder zijn kind is niet juist!---")
+
+        blackcountl = 0
+        blackcountr = 0
+
+        # Doorloop de linkerdeelboom van de node
+        if current_node.left is not None:
+            blackcountl = self.check(current_node.left, False)
+
+        # Doorloop de rechterdeelboom van de node
+        if current_node.right is not None:
+            blackcountr = self.check(current_node.right, False)
+
+        if blackcountl != blackcountr:
+            print(f"---Aantal zwarte nodes kloppen niet bij {current_node.key}---")
+
+        if not start:
+            if current_node.color == "black":
+                return 1 + blackcountl
+            else:
+                return blackcountl
 
 
 if __name__ == "__main__":
-    # d = {'root': 4, 'color': "black", 'children': [
-    #         {'root': 2, 'color': "red", 'children': [
-    #             {'root': 1, 'color': "black"},
-    #             {'root': 3, 'color': "black"}
-    #         ]},
-    #         {'root': 6, 'color': "red", 'children': [
-    #             {'root': 5, 'color': "black"},
-    #             {'root': 8, 'color': "black", 'children': [
-    #                 {'root': 7, 'color': "red"},
-    #                 {'root': 9, 'color': "red"}
-    #             ]}
-    #         ]}
-    # ]}
-    #
-    # d2 = {'root': 20, 'color': "black", 'children': [
-    #         {'root': 11, 'color': "red", 'children': [{'root': 10, 'color': "black"}, None]},
-    #         {'root': 40, 'color': "black"}
-    # ]}
-    #
-    # d3 = {'root': 50,'color': "black", 'children':[
-    #         {'root': 8, 'color': "red", 'children': [
-    #             {'root': 5, 'color': "black"},
-    #             {'root': 10, 'color': "black"}
-    #         ]},
-    #         {'root': 90, 'color': "red", 'children': [
-    #             {'root': 70, 'color': "black", 'children': [
-    #                 {'root': 80, 'color': "red"},
-    #                 None
-    #             ]},
-    #             {'root': 99, 'color': "black"}
-    #         ]}
-    # ]}
+    d = {'root': 4, 'color': "black", 'children': [
+            {'root': 2, 'color': "red", 'children': [
+                {'root': 1, 'color': "black"},
+                {'root': 3, 'color': "black"}
+            ]},
+            {'root': 6, 'color': "red", 'children': [
+                {'root': 5, 'color': "black"},
+                {'root': 8, 'color': "black", 'children': [
+                    {'root': 7, 'color': "red"},
+                    {'root': 9, 'color': "red"}
+                ]}
+            ]}
+    ]}
 
     folder = './test-output'
     for filename in os.listdir(folder):
@@ -778,23 +774,27 @@ if __name__ == "__main__":
 
     boom = RedBlackTree()
 
-    l = list(range(0, 20))
+    l = list(range(0, 500))
     shuffle(l)
     print(l)
-    # l = []
+    # l = [18, 16, 11, 14, 17, 0, 7, 12, 4, 19, 2, 6, 13, 15, 3, 8, 10, 1, 5, 9]
+    # l_copy = [18, 16, 11, 14, 17, 0, 7, 12, 4, 19, 2, 6, 13, 15, 3, 8, 10, 1, 5, 9]
 
     for i in l:
         item = createTreeItem(i)
         boom.insertItem(item)
         # boom.toDot()
         # print(f"{i} has been inserted")
+        boom.check()
 
 
     # Debugging an insert
-    # item = createTreeItem(16)
+    # item = createTreeItem(2)
     # boom.insertItem(item)
 
     boom.toDot(True)
+
+    print()
+
     # print("inorder traverse:")
     # boom.inorderTraverse()
-
