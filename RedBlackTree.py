@@ -129,6 +129,52 @@ class RBTNode:
         if temp is not None:
             self.left.parent = self.left
 
+    def getLeftSibling(self):
+        if self.parent.color == "black":
+            real_parent = self.parent
+        else:
+            real_parent = self.parent.parent
+
+        if real_parent.is2node():
+            return self.parent.left
+
+        elif real_parent.is3node():
+            if self.parent.color == "red" and self.isRightChild():
+                return self.parent.left
+            elif self.parent.color == "red" and self.isLeftChild():
+                return self.parent.parent.left
+            elif self.parent.color == "black":
+                return self.parent.left.right
+
+        elif real_parent.is4node():
+            if self.isRightChild():
+                return self.parent.left
+            elif self.isLeftChild() and self.parent.isRightChild():
+                return self.parent.parent.left.right
+
+    def getRightSibling(self):
+        if self.parent.color == "black":
+            real_parent = self.parent
+        else:
+            real_parent = self.parent.parent
+
+        if real_parent.is2node():
+            return self.parent.right
+
+        elif real_parent.is3node():
+            if self.parent.color == "red" and self.isLeftChild():
+                return self.parent.right
+            elif self.parent.color == "red" and self.isRightChild():
+                return self.parent.parent.right
+            elif self.parent.color == "black":
+                return self.parent.right.left
+
+        elif real_parent.is4node():
+            if self.isLeftChild():
+                return self.parent.right
+            elif self.isRightChild() and self.parent.isLeftChild():
+                return self.parent.parent.right.left
+
 
 class RedBlackTree:
     counter = 0
@@ -577,7 +623,25 @@ class RedBlackTree:
         pass
 
     def merge2node(self, current_node):
-        pass
+        if current_node.parent is not None:
+            # Kijk naar de echte ouder
+            if current_node.parent.color == "black":
+                real_parent = current_node.parent
+            else:
+                real_parent = current_node.parent.parent
+
+        # Als de ouder 2node is
+        if real_parent.is2node():
+            pass
+
+        # Als de ouder 3node is
+        if real_parent.is3node():
+            pass
+
+        # Als de ouder 4node is
+        if real_parent.is4node():
+            pass
+
 
     def deleteSearch(self, key, current_node=None, start=True):
         # Zet in het begin de current_node gelijk aan die van de root
@@ -588,8 +652,32 @@ class RedBlackTree:
             self.deleteSearch(key, self.root, False)
             return True
 
+        # Als de node een 2node is en die is geen root
         if current_node.color == "black" and current_node.is2node() and current_node != self.root:
+            # Kijk of dat de linkersibling iets kan uitlenen
+            # en dan redistribute
+            left_sibling = current_node.getLeftSibling()
+            if left_sibling.is3node() or left_sibling.is4node():
+                pass
+
+            # Kijk of dat de rechtersibling iets kan uitlenen
+            # en dan redistribute
+            right_sibling = current_node.getRightSibling()
+            if right_sibling.is3node() or left_sibling.is4node():
+                pass
+
+            # Anders merge met linkersibling (of rechtersibling als waarde meest rechtse is)
             self.merge2node(current_node)
+
+
+        if key == current_node.key:
+            return current_node
+        elif key < current_node.key and current_node.left is not None:
+            self.deleteSearch(key, current_node, False)
+        elif key > current_node.key and current_node.right is not None:
+            self.deleteSearch(key, current_node, False)
+        else:
+            return None
 
 
     def deleteSearchInorderSuccessor(self, current_node):
@@ -603,6 +691,9 @@ class RedBlackTree:
         # Zoek de node die het te verwijderen item bevat en
         # vorm elke 2-knoop (behalve de wortel) op dit pad om tot 3-knoop of een 4-knoop
         delete_node = self.deleteSearch(key)
+        if delete_node is None:
+            return False
+
 
         # Zoek de inorder successor van de node
         inosuc = self.deleteSearchInorderSuccessor(delete_node)
@@ -611,8 +702,6 @@ class RedBlackTree:
 
 
         # Delete het blad en corrigeer
-
-
 
     def clear(self):
         """
@@ -814,20 +903,6 @@ class RedBlackTree:
 
 
 if __name__ == "__main__":
-    d = {'root': 4, 'color': "black", 'children': [
-            {'root': 2, 'color': "red", 'children': [
-                {'root': 1, 'color': "black"},
-                {'root': 3, 'color': "black"}
-            ]},
-            {'root': 6, 'color': "red", 'children': [
-                {'root': 5, 'color': "black"},
-                {'root': 8, 'color': "black", 'children': [
-                    {'root': 7, 'color': "red"},
-                    {'root': 9, 'color': "red"}
-                ]}
-            ]}
-    ]}
-
     folder = './test-output'
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
@@ -839,29 +914,76 @@ if __name__ == "__main__":
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
+    # Demo 1
+
+    d = {'root': "dummy", 'color': "black", 'children': [
+        {'root': "P", 'color': "black", 'children': [
+            {'root': "T", 'color': "black", 'children': [
+                {'root': "a", 'color': "black"},
+                {'root': "S", 'color': "red", 'children': [
+                    {'root': "b", 'color': "black"},
+                    {'root': "c", 'color': "black"}
+                ]}
+            ]},
+            {'root': "X", 'color': "black", 'children': [
+                {'root': "d", 'color': "black"},
+                {'root': "e", 'color': "black"}
+            ]}
+        ]},
+        None
+    ]}
+
     boom = RedBlackTree()
+    boom.load(d)
 
-    l = list(range(0, 50))
-    shuffle(l)
-    print(l)
-    # l = [9, 2, 6, 4, 7, 3, 0, 1, 8, 5]
+    boom.toDot()
 
-    for i in l:
-        item = createTreeItem(i)
-        boom.insertItem(item)
-        # boom.toDot()
-        # print(f"{i} has been inserted")
-        boom.check()
-
-
-    # Debug insert
-
-    # item = createTreeItem(2)
-    # boom.insertItem(item)
+    boom.root.left.left.leftRotate()
+    print(boom.root.left.left.key)
+    boom.toDot()
+    boom.root.left.rightRotate()
 
     boom.toDot(True)
 
-    # boom.inorderTraverse()
-    print(boom.count)
+    # l = list(range(0, 50))
+    # shuffle(l)
+    # print(l)
+    # l = [28, 45, 6, 4, 5, 16, 44, 18, 47, 46, 11, 3, 9, 23, 32, 35, 13, 43, 25, 37, 30, 17, 42, 22, 24, 19, 14, 34, 29, 41, 20, 49, 12, 40, 7, 15, 39, 1, 38, 27, 10, 2, 21, 8, 0, 48, 31, 26, 33, 36]
 
-    # boom.print()
+    # for i in l:
+    #     item = createTreeItem(i)
+    #     boom.insertItem(item)
+    #     # boom.toDot()
+    #     # print(f"{i} has been inserted")
+    #     boom.check()
+
+    boom.toDot(True)
+
+
+    # Demo 1
+    #
+    # d = {'root': "dummy", 'color': "black", 'children': [
+    #     {'root': "P", 'color': "black", 'children': [
+    #         {'root': "S", 'color': "black", 'children': [
+    #             {'root': "T", 'color': "red", 'children': [
+    #                 {'root': "a", 'color': "black"},
+    #                 {'root': "b", 'color': "black"}
+    #             ]},
+    #             {'root': "c", 'color': "black"}
+    #         ]},
+    #         {'root': "X", 'color': "black", 'children': [
+    #             {'root': "d", 'color': "black"},
+    #             {'root': "e", 'color': "black"}
+    #         ]}
+    #     ]},
+    #     None
+    # ]}
+    #
+    # boom = RedBlackTree()
+    # boom.load(d)
+    #
+    # boom.toDot()
+    #
+    # boom.root.left.rightRotate()
+    #
+    # boom.toDot(True)
