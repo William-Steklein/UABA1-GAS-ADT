@@ -95,40 +95,6 @@ class RBTNode:
         self.right.switchColor()
         self.switchColor()
 
-    def leftRotate(self):
-        A = self.right # A = child of self
-        B = self.parent # B = parent of self
-        if B is not None:
-            if self.isLeftChild():
-                B.left = A
-            else:
-                B.right = A
-        A.parent = B
-        self.parent = A
-
-        temp = A.left
-        A.left = self
-        self.right = temp
-        if temp is not None:
-            self.right.parent = self.right
-
-    def rightRotate(self):
-        A = self.left # A = child of self
-        B = self.parent # B = parent of self
-        if B is not None:
-            if self.isLeftChild():
-                B.left = A
-            else:
-                B.right = A
-        A.parent = B
-        self.parent = A
-
-        temp = A.right
-        A.right = self
-        self.left = temp
-        if temp is not None:
-            self.left.parent = self.left
-
     def getLeftSibling(self):
         if self.parent.color == "black":
             real_parent = self.parent
@@ -392,6 +358,52 @@ class RedBlackTree:
         """
         return self.root.value
 
+    def leftRotate(self, current_node):
+        A = current_node.right # A = child of self
+        B = current_node.parent # B = parent of self
+
+        if current_node.parent is None:
+            self.root = A
+
+        if B is not None:
+            if current_node.isLeftChild():
+                B.left = A
+            else:
+                B.right = A
+        A.parent = B
+
+        current_node.parent = A
+
+        temp = A.left
+        A.left = current_node
+        current_node.right = temp
+        if temp is not None:
+            current_node.right.parent = current_node
+
+        if current_node.parent.parent is None:
+            self.root = current_node
+
+    def rightRotate(self, current_node):
+        A = current_node.left # A = child of self
+        B = current_node.parent # B = parent of self
+
+        if current_node.parent is None:
+            self.root = A
+
+        if B is not None:
+            if current_node.isLeftChild():
+                B.left = A
+            else:
+                B.right = A
+        A.parent = B
+        current_node.parent = A
+
+        temp = A.right
+        A.right = current_node
+        current_node.left = temp
+        if temp is not None:
+            current_node.left.parent = current_node
+
     def case1(self, current_node):
         temp = current_node.parent.parent
         temp.left = current_node.parent.right
@@ -571,15 +583,15 @@ class RedBlackTree:
 
             if current_node.color == "red" and new_node.color == "red":
                 if current_node.isLeftChild():
-                    current_node.parent.rightRotate()
+                    self.rightRotate(current_node.parent)
 
                     current_node.switchColor()
                     current_node.right.switchColor()
 
                 else:
-                    current_node.rightRotate()
+                    self.rightRotate(current_node)
                     current_node = current_node.parent
-                    current_node.parent.leftRotate()
+                    self.leftRotate(current_node.parent)
 
                     current_node.switchColor()
                     current_node.left.switchColor()
@@ -599,27 +611,50 @@ class RedBlackTree:
 
             if current_node.color == "red" and new_node.color == "red":
                 if current_node.isRightChild():
-                    current_node.parent.leftRotate()
+                    self.leftRotate(current_node.parent)
 
                     current_node.switchColor()
                     current_node.left.switchColor()
                 else:
-                    current_node.leftRotate()
+                    self.leftRotate(current_node)
                     current_node = current_node.parent
-                    current_node.parent.rightRotate()
+                    self.rightRotate(current_node.parent)
 
                     current_node.switchColor()
                     current_node.right.switchColor()
-
-                if current_node.parent is None:
-                    self.root = current_node
 
             return True
 
         elif key > current_node.key and current_node.right is not None:
             self.insertItem(None, key, value, current_node.right, False)
 
-    def redistribute(self):
+    def leftredistribute(self, current_node):
+
+        # Voeg functionaliteit als sibling 4node is
+
+        if current_node.parent is not None:
+            # Kijk naar de echte ouder
+            if current_node.parent.color == "black":
+                real_parent = current_node.parent
+            else:
+                real_parent = current_node.parent.parent
+
+        self.print()
+        left_sibling = current_node.getLeftSibling()
+
+        # Als echte ouder 2node is # finito
+        if real_parent.is2node():
+            if left_sibling.right.color == "red":
+                self.leftRotate(left_sibling)
+                # nu moet lef_sibling S zijn
+            self.rightRotate(current_node.parent)
+
+        # Als echte ouder 3node is
+
+
+        # Als echte ouder 4node is
+
+    def rightredistribute(self, current_node):
         pass
 
     def merge2node(self, current_node):
@@ -632,16 +667,54 @@ class RedBlackTree:
 
         # Als de ouder 2node is
         if real_parent.is2node():
-            pass
+            # Doe een colorswitch
+            current_node.switchColor()
+            if current_node.isLeftChild():
+                current_node.parent.right.switchColor()
+            else:
+                current_node.parent.left.switchColor()
 
         # Als de ouder 3node is
         if real_parent.is3node():
-            pass
+            left_sibling = current_node.getLeftSibling()
+            if left_sibling is not None:
+                if current_node.isRightChild() and left_sibling.isLeftChild():
+                    current_node.parent.colorChanges()
+                elif current_node.isLeftChild() and left_sibling.isLeftChild():
+                    self.leftRotate(current_node.parent.parent)
+
+                    current_node.switchColor()
+                    current_node.parent.left.switchColor()
+                    current_node.parent.parent.switchColor()
+                elif current_node.isRightChild() and left_sibling.isRightChild():
+                    self.rightRotate(current_node.parent)
+
+                    current_node.switchColor()
+                    current_node.parent.left.switchColor()
+                    current_node.parent.parent.switchColor()
+            else:
+                right_sibling = current_node.getRightSibling()
+                if right_sibling.isRightChild():
+                    current_node.parent.colorChanges()
+                else:
+                    self.rightRotate(current_node.parent)
 
         # Als de ouder 4node is
         if real_parent.is4node():
-            pass
+            left_sibling = current_node.getLeftSibling()
+            if left_sibling is not None:
+                if current_node.isRightChild():
+                    current_node.parent.colorChanges()
+                else:
+                    self.rightRotate(current_node.parent.parent)
+                    self.leftRotate(current_node.parent.parent)
 
+                    current_node.switchColor()
+                    current_node.parent.left.switchColor()
+                    current_node.parent.parent.parent.switchColor()
+            else:
+                # Merge met de right sibling
+                current_node.parent.colorChanges()
 
     def deleteSearch(self, key, current_node=None, start=True):
         # Zet in het begin de current_node gelijk aan die van de root
@@ -669,7 +742,6 @@ class RedBlackTree:
             # Anders merge met linkersibling (of rechtersibling als waarde meest rechtse is)
             self.merge2node(current_node)
 
-
         if key == current_node.key:
             return current_node
         elif key < current_node.key and current_node.left is not None:
@@ -678,7 +750,6 @@ class RedBlackTree:
             self.deleteSearch(key, current_node, False)
         else:
             return None
-
 
     def deleteSearchInorderSuccessor(self, current_node):
         pass
@@ -693,7 +764,6 @@ class RedBlackTree:
         delete_node = self.deleteSearch(key)
         if delete_node is None:
             return False
-
 
         # Zoek de inorder successor van de node
         inosuc = self.deleteSearchInorderSuccessor(delete_node)
@@ -914,48 +984,147 @@ if __name__ == "__main__":
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-    # Demo 1
+    # # Demo 5 merge2node als ouder 4node is en de te mergen node een linkerkind is en sibling rechterkind
+    #
+    # d5 = {'root': "M", 'color': "black", 'children': [
+    #         {'root': "P", 'color': "red", 'children': [
+    #             {'root': "a", 'color': "black"},
+    #             {'root': "S", 'color': "black", 'children': [
+    #                 {'root': "b", 'color': "black"},
+    #                 {'root': "c", 'color': "black"}
+    #             ]}
+    #         ]},
+    #         {'root': "Q", 'color': "red", 'children': [
+    #             {'root': "X", 'color': "black", 'children': [
+    #                 {'root': "d", 'color': "black"},
+    #                 {'root': "e", 'color': "black"}
+    #             ]},
+    #             {'root': "f", 'color': "black"}
+    #         ]}
+    # ]}
+    #
+    # boom = RedBlackTree()
+    # boom.load(d5)
+    #
+    # boom.check()
+    # boom.toDot()
+    #
+    # boom.merge2node(boom.root.right.left)
+    # boom.check()
+    #
+    #
+    # boom.toDot(True)
 
-    d = {'root': "dummy", 'color': "black", 'children': [
-        {'root': "P", 'color': "black", 'children': [
-            {'root': "T", 'color': "black", 'children': [
-                {'root': "a", 'color': "black"},
-                {'root': "S", 'color': "red", 'children': [
-                    {'root': "b", 'color': "black"},
-                    {'root': "c", 'color': "black"}
-                ]}
-            ]},
-            {'root': "X", 'color': "black", 'children': [
-                {'root': "d", 'color': "black"},
-                {'root': "e", 'color': "black"}
-            ]}
-        ]},
-        None
-    ]}
+    # # Demo 4 rightRotate
+    #
+    # d3 = {'root': "self", 'color': "black", 'children': [
+    #             {'root': "A", 'color': "black", 'children': [
+    #                 {'root': "a", 'color': "black"},
+    #                 {'root': "b", 'color': "black"}
+    #             ]},
+    #             {'root': "c", 'color': "black"}
+    #         ]}
+    #
+    # boom = RedBlackTree()
+    # boom.load(d3)
+    #
+    # # boom.check()
+    # boom.toDot()
+    #
+    # # print(x.key)
+    # boom.check()
+    # boom.rightRotate(boom.root)
+    #
+    # boom.toDot(True)
+
+    # # Demo 3 left merge 3node ouder case2
+    #
+    # d3 = {'root': "dummy", 'color': "black", 'children': [
+    #     {'root': "M", 'color': "black", 'children': [
+    #         {'root': "S", 'color': "black", 'children': [
+    #             {'root': "a", 'color': "black"},
+    #             {'root': "b", 'color': "black"}
+    #         ]},
+    #         {'root': "P", 'color': "red", 'children': [
+    #             {'root': "X", 'color': "black", 'children': [
+    #                 {'root': "c", 'color': "black"},
+    #                 {'root': "d", 'color': "black"}
+    #             ]},
+    #             {'root': "e", 'color': "black"}
+    #         ]}
+    #     ]},
+    #     None
+    # ]}
+    #
+    # boom = RedBlackTree()
+    # boom.load(d3)
+    #
+    # boom.check()
+    # boom.toDot()
+    #
+    # x = boom.root.left.right.left
+    # boom.merge2node(x)
+    # # print(x.key)
+    # boom.check()
+    #
+    #
+    # boom.toDot(True)
+
+    # # Demo 2
+    #
+    # d = {'root': "dummy", 'color': "black", 'children': [
+    #     {'root': "P", 'color': "black", 'children': [
+    #         {'root': "T", 'color': "black", 'children': [
+    #             {'root': "a", 'color': "black"},
+    #             {'root': "S", 'color': "red", 'children': [
+    #                 {'root': "b", 'color': "black"},
+    #                 {'root': "c", 'color': "black"}
+    #             ]}
+    #         ]},
+    #         {'root': "X", 'color': "black", 'children': [
+    #             {'root': "d", 'color': "black"},
+    #             {'root': "e", 'color': "black"}
+    #         ]}
+    #     ]},
+    #     None
+    # ]}
+    #
+    # boom = RedBlackTree()
+    # boom.load(d)
+    #
+    # # boom.toDot()
+    # #
+    # # boom.leftRotate(boom.root.left.left)
+    # # print(boom.root.left.left.key)
+    # # boom.toDot()
+    # # boom.rightRotate(boom.root.left)
+    #
+    # boom.toDot()
+    #
+    # print(boom.root.left.right.key)
+    # boom.leftRotate(boom.root.left.right)
+    # print(boom.root.left.right.key)
+    #
+    # # boom.merge2node(boom.root.left.right)
+    #
+    # # print(boom.root.left.right.key)
+    # # print(boom.root.left.right.getLeftSibling().key)
+    #
+    # boom.toDot(True)
 
     boom = RedBlackTree()
-    boom.load(d)
-
-    boom.toDot()
-
-    boom.root.left.left.leftRotate()
-    print(boom.root.left.left.key)
-    boom.toDot()
-    boom.root.left.rightRotate()
-
-    boom.toDot(True)
 
     # l = list(range(0, 50))
     # shuffle(l)
     # print(l)
-    # l = [28, 45, 6, 4, 5, 16, 44, 18, 47, 46, 11, 3, 9, 23, 32, 35, 13, 43, 25, 37, 30, 17, 42, 22, 24, 19, 14, 34, 29, 41, 20, 49, 12, 40, 7, 15, 39, 1, 38, 27, 10, 2, 21, 8, 0, 48, 31, 26, 33, 36]
+    l = [28, 45, 6, 4, 5, 16, 44, 18, 47, 46, 11, 3, 9, 23, 32, 35, 13, 43, 25, 37, 30, 17, 42, 22, 24, 19, 14, 34, 29, 41, 20, 49, 12, 40, 7, 15, 39, 1, 38, 27, 10, 2, 21, 8, 0, 48, 31, 26, 33, 36]
 
-    # for i in l:
-    #     item = createTreeItem(i)
-    #     boom.insertItem(item)
-    #     # boom.toDot()
-    #     # print(f"{i} has been inserted")
-    #     boom.check()
+    for i in l:
+        item = createTreeItem(i)
+        boom.insertItem(item)
+        # boom.toDot()
+        # print(f"{i} has been inserted")
+        boom.check()
 
     boom.toDot(True)
 
@@ -984,6 +1153,6 @@ if __name__ == "__main__":
     #
     # boom.toDot()
     #
-    # boom.root.left.rightRotate()
+    # boom.rightRotate(boom.root.left)
     #
     # boom.toDot(True)
