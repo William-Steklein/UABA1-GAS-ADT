@@ -3,7 +3,7 @@ ADT voor rood-zwartboom
 """
 
 from graphviz import Graph
-from random import shuffle
+import random
 import os, shutil
 
 def createTreeItem(key,val=None):
@@ -101,15 +101,15 @@ class RBTNode:
         else:
             real_parent = self.parent.parent
 
-        if real_parent.is2node():
+        if real_parent.is2node() and self.isRightChild():
             return self.parent.left
 
         elif real_parent.is3node():
             if self.parent.color == "red" and self.isRightChild():
                 return self.parent.left
-            elif self.parent.color == "red" and self.isLeftChild():
+            elif self.parent.color == "red" and self.isLeftChild() and self.parent.isRightChild():
                 return self.parent.parent.left
-            elif self.parent.color == "black":
+            elif self.parent.color == "black" and self.isRightChild():
                 return self.parent.left.right
 
         elif real_parent.is4node():
@@ -124,15 +124,15 @@ class RBTNode:
         else:
             real_parent = self.parent.parent
 
-        if real_parent.is2node():
+        if real_parent.is2node() and self.isLeftChild():
             return self.parent.right
 
         elif real_parent.is3node():
             if self.parent.color == "red" and self.isLeftChild():
                 return self.parent.right
-            elif self.parent.color == "red" and self.isRightChild():
+            elif self.parent.color == "red" and self.isRightChild() and self.parent.isLeftChild():
                 return self.parent.parent.right
-            elif self.parent.color == "black":
+            elif self.parent.color == "black" and self.isLeftChild():
                 return self.parent.right.left
 
         elif real_parent.is4node():
@@ -708,9 +708,10 @@ class RedBlackTree:
         right_sibling = current_node.getRightSibling()
 
         if right_sibling.is3node():
-            if right_sibling.right is not None and right_sibling.left.color == "red":
+            if right_sibling.left is not None and right_sibling.left.color == "red":
                 self.rightRotate(right_sibling)
                 right_sibling.switchColor()
+                right_sibling.parent.switchColor()
                 right_sibling = right_sibling.parent
                 # Nu moet S left sibling zijn
         else:
@@ -741,7 +742,7 @@ class RedBlackTree:
             elif current_node == real_parent.left.right:
                 current_node.parent.switchColor()
                 self.rightRotate(current_node.parent.parent)
-                current_node.parent.right.switchcolor()
+                current_node.parent.right.switchColor()
                 current_node.parent.right.right.switchColor()
                 self.leftRotate(current_node.parent)
                 current_node.switchColor()
@@ -758,9 +759,9 @@ class RedBlackTree:
             if current_node.isLeftChild():
                 self.leftRotate(current_node.parent)
                 current_node.switchColor()
-                current_node.parent.switchcolor()
+                current_node.parent.switchColor()
                 current_node.parent.parent.switchColor()
-                current_node.parent.parent.left.switchColor()
+                current_node.parent.parent.right.switchColor()
             else:
                 self.rightRotate(right_sibling.parent)
                 self.leftRotate(current_node.parent.parent)
@@ -786,7 +787,7 @@ class RedBlackTree:
                 current_node.parent.left.switchColor()
 
         # Als de ouder 3node is
-        if real_parent.is3node():
+        elif real_parent.is3node():
             left_sibling = current_node.getLeftSibling()
             if left_sibling is not None:
                 if current_node.isRightChild() and left_sibling.isLeftChild():
@@ -808,10 +809,14 @@ class RedBlackTree:
                 if right_sibling.isRightChild():
                     current_node.parent.colorChanges()
                 else:
-                    self.rightRotate(current_node.parent)
+                    self.leftRotate(current_node.parent)
+
+                    current_node.switchColor()
+                    current_node.parent.right.switchColor()
+                    current_node.parent.parent.switchColor()
 
         # Als de ouder 4node is
-        if real_parent.is4node():
+        elif real_parent.is4node():
             left_sibling = current_node.getLeftSibling()
             if left_sibling is not None:
                 if current_node.isRightChild():
@@ -827,37 +832,41 @@ class RedBlackTree:
                 # Merge met de right sibling
                 current_node.parent.colorChanges()
 
-    def deleteSearch(self, key, current_node=None, start=True):
+    def mergeOrRedistribute(self, current_node):
+        # Als de node een 2node is en die is geen root
+        if current_node != self.root and current_node.color == "black" and current_node.is2node():
+            # Kijk of dat de linkersibling iets kan uitlenen
+            # en dan redistribute
+            left_sibling = current_node.getLeftSibling()
+            right_sibling = current_node.getRightSibling()
+            if left_sibling is not None and (left_sibling.is3node() or left_sibling.is4node()):
+                self.leftredistribute(current_node)
+
+            # Kijk of dat de rechtersibling iets kan uitlenen
+            # en dan redistribute
+            elif right_sibling is not None and (right_sibling.is3node() or right_sibling.is4node()):
+                self.rightredistribute(current_node)
+
+            # Anders merge met linkersibling (of rechtersibling als waarde meest rechtse is)
+            else:
+                self.merge2node(current_node)
+
+    def deleteSearchNode(self, key, current_node=None, start=True):
         # Zet in het begin de current_node gelijk aan die van de root
         if start:
             # Als de boom leeg is
             if self.root is None:
                 return False
-            return self.deleteSearch(key, self.root, False)
+            return self.deleteSearchNode(key, self.root, False)
 
-        # Als de node een 2node is en die is geen root
-        if current_node.color == "black" and current_node.is2node() and current_node != self.root:
-            # Kijk of dat de linkersibling iets kan uitlenen
-            # en dan redistribute
-            left_sibling = current_node.getLeftSibling()
-            if left_sibling.is3node() or left_sibling.is4node():
-                self.leftredistribute(current_node)
-
-            # Kijk of dat de rechtersibling iets kan uitlenen
-            # en dan redistribute
-            right_sibling = current_node.getRightSibling()
-            if right_sibling.is3node() or left_sibling.is4node():
-                self.rightredistribute(current_node)
-
-            # Anders merge met linkersibling (of rechtersibling als waarde meest rechtse is)
-            self.merge2node(current_node)
+        self.mergeOrRedistribute(current_node)
 
         if key == current_node.key:
             return current_node
         elif key < current_node.key and current_node.left is not None:
-            return self.deleteSearch(key, current_node.left, False)
+            return self.deleteSearchNode(key, current_node.left, False)
         elif key > current_node.key and current_node.right is not None:
-            return self.deleteSearch(key, current_node.right, False)
+            return self.deleteSearchNode(key, current_node.right, False)
         else:
             return None
 
@@ -871,7 +880,7 @@ class RedBlackTree:
         """
         # Zoek de node die het te verwijderen item bevat en
         # vorm elke 2-knoop (behalve de wortel) op dit pad om tot 3-knoop of een 4-knoop
-        delete_node = self.deleteSearch(key)
+        delete_node = self.deleteSearchNode(key)
         if delete_node is None:
             return False
 
@@ -1094,28 +1103,79 @@ if __name__ == "__main__":
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
+    # # Demo11 herverdelen met 3node parent v3
+    #
+    # d10 = {'root': 15, 'color': "black", 'children': [
+    #         {'root': 8, 'color': "red", 'children': [
+    #             {'root': 7, 'color': "black"},
+    #             {'root': 10, 'color': "black", 'children': [
+    #                 {'root': 9, 'color': "black"},
+    #                 {'root': 11, 'color': "black"}
+    #             ]}
+    #         ]},
+    #         {'root': 18, 'color': "black", 'children': [
+    #         {'root': 17, 'color': "black"},
+    #         {'root': 19, 'color': "black"}
+    #     ]}
+    # ]}
+    #
+    # boom = RedBlackTree()
+    # boom.load(d10)
+    #
+    # boom.toDot()
+    # boom.check()
+    #
+    # # boom.merge2node(boom.root.right)
+    # print(boom.deleteSearch(18).key)
+    # # boom.leftredistribute(boom.root.right.left)
+    # boom.check()
+    #
+    #
+    # boom.toDot(True)
+
+    # Demo 10 deleteSearch test
+
     boom = RedBlackTree()
+    counter = 0
 
-    # l = list(range(0, 50))
-    # shuffle(l)
-    # print(l)
-    l = [28, 45, 6, 4, 5, 16, 44, 18, 47, 46, 11, 3, 9, 23, 32, 35, 13, 43, 25, 37, 30, 17, 42, 22, 24, 19, 14, 34, 29, 41, 20, 49, 12, 40, 7, 15, 39, 1, 38, 27, 10, 2, 21, 8, 0, 48, 31, 26, 33, 36]
-
-    for i in l:
-        item = createTreeItem(i)
-        boom.insertItem(item)
-        # boom.toDot()
-        # print(f"{i} has been inserted")
+    for i in range(100):
+        print(f"--------test{counter}-------")
+        l = list(range(0, 40))
+        random.shuffle(l)
+        print("list: ", l)
+        for j in l:
+            item = createTreeItem(j)
+            boom.insertItem(item)
+        print("check 1: ")
         boom.check()
+        x = random.choice(l)
+        print("x: ", x)
+        print(boom.deleteSearchNode(x).key)
+        print("check 2: ")
+        boom.check()
+        print("--------------------")
+        boom.clear()
+        counter += 1
 
-    boom.toDot()
-    boom.check()
-
-    node = boom.deleteSearch(31)
-    boom.check()
-    print(node.key)
-
-    boom.toDot(True)
+    # # l = list(rangerange(0, 40))
+    # # shuffle(l)
+    # # print(l)
+    # l = [4, 32, 36, 1, 7, 34, 26, 17, 10, 33, 31, 25, 9, 29, 37, 28, 18, 12, 23, 20, 13, 5, 11, 19, 8, 30, 22, 38, 15, 6, 39, 14, 0, 27, 35, 2, 16, 24, 3, 21]
+    # for i in l:
+    #     item = createTreeItem(i)
+    #     boom.insertItem(item)
+    #     # boom.toDot()
+    #     # print(f"{i} has been inserted")
+    #     # boom.check()
+    #
+    # boom.toDot()
+    # boom.check()
+    #
+    # print(boom.deleteSearch(13).key)
+    #
+    # boom.check()
+    #
+    # boom.toDot(True)
 
     # # Demo 9 herverdelen met 3node parent v3
     #
