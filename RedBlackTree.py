@@ -4,6 +4,7 @@ ADT voor rood-zwartboom
 
 from graphviz import Graph
 import random
+from random import shuffle
 import os, shutil
 
 def createTreeItem(key,val=None):
@@ -856,7 +857,7 @@ class RedBlackTree:
         if start:
             # Als de boom leeg is
             if self.root is None:
-                return False
+                return None
             return self.deleteSearchNode(key, self.root, False)
 
         self.mergeOrRedistribute(current_node)
@@ -870,8 +871,22 @@ class RedBlackTree:
         else:
             return None
 
-    def deleteSearchInorderSuccessor(self, current_node):
-        pass
+    def deleteSearchInorderSuccessor(self, current_node, left=False):
+        # Herverdeel of merge als het een 2node is
+        self.mergeOrRedistribute(current_node)
+
+        # Ga eerst 1 keer naar rechts
+        if not left:
+            if current_node.right is not None:
+                return self.deleteSearchInorderSuccessor(current_node.right, True)
+            else:
+                return current_node
+        # Blijf links gaan tot een blad
+        else:
+            if current_node.left is not None:
+                return self.deleteSearchInorderSuccessor(current_node.left, True)
+            else:
+                return current_node
 
     def deleteItem(self, key):
         """
@@ -1133,30 +1148,54 @@ if __name__ == "__main__":
     #
     # boom.toDot(True)
 
+    boom = RedBlackTree()
+    l = list(range(0, 20))
+    shuffle(l)
+    print(l)
+    l2 = [7, 15, 19, 10, 17, 18, 14, 16, 8, 13, 9, 12, 5, 1, 11, 0, 6, 4, 2, 3]
+    # l = [0, 9, 3, 13, 11, 14, 15, 6, 10, 4, 8, 5, 18, 17, 1, 16, 12, 19, 2, 7]
+    for i in l2:
+        item = createTreeItem(i)
+        boom.insertItem(item)
+        # boom.toDot()
+        # print(f"{i} has been inserted")
+        # boom.check()
+
+    boom.toDot()
+    boom.check()
+
+    node = boom.deleteSearchNode(14)
+    boom.toDot()
+    boom.mergeOrRedistribute(node)
+
+    boom.check()
+
+    boom.toDot(True)
+
     # Demo 10 deleteSearch test
 
-    boom = RedBlackTree()
-    counter = 0
-
-    for i in range(100):
-        print(f"--------test{counter}-------")
-        l = list(range(0, 40))
-        random.shuffle(l)
-        print("list: ", l)
-        for j in l:
-            item = createTreeItem(j)
-            boom.insertItem(item)
-        print("check 1: ")
-        boom.check()
-        x = random.choice(l)
-        print("x: ", x)
-        print(boom.deleteSearchNode(x).key)
-        print("check 2: ")
-        boom.check()
-        print("--------------------")
-        boom.clear()
-        counter += 1
-
+    # boom = RedBlackTree()
+    # counter = 0
+    # #
+    # # for i in range(100):
+    # #     print(f"--------test{counter}-------")
+    # #     l = list(range(0, 40))
+    # #     random.shuffle(l)
+    # #     print("list: ", l)
+    # #     for j in l:
+    # #         item = createTreeItem(j)
+    # #         boom.insertItem(item)
+    # #     print("check 1: ")
+    # #     boom.check()
+    # #     x = random.choice(l)
+    # #     print("x: ", x)
+    # #     print(boom.deleteSearchNode(x).key)
+    # #     print("check 2: ")
+    # #     boom.check()
+    # #     print("--------------------")
+    # #     boom.clear()
+    # #     counter += 1
+    #
     # # l = list(rangerange(0, 40))
     # # shuffle(l)
     # # print(l)
@@ -1171,7 +1210,7 @@ if __name__ == "__main__":
     # boom.toDot()
     # boom.check()
     #
-    # print(boom.deleteSearch(13).key)
+    # print(boom.deleteSearchNode(13).key)
     #
     # boom.check()
     #
