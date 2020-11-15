@@ -1,5 +1,5 @@
 """
-ADT voor stack
+ADT contract voor stack
 """
 
 class StackNode:
@@ -127,27 +127,6 @@ class Stack:
         if self.top is not None:
             return self.top.value, True
         return None, False
-
-
-# # Testing
-# if __name__ == "__main__":
-#     s = Stack()
-#     print(s.isEmpty())
-#
-#     for i in range(1, 11):
-#         s.push(i)
-#     s.print()
-#
-#     l = s.save()
-#     print(l)
-#     s2 = Stack()
-#     s2.load(l)
-#     s2.print()
-#
-#
-#     s3 = Stack()
-#     s3.load([])
-#     s3.print()
 
 if __name__ == "__main__":
     s = Stack()

@@ -1,5 +1,5 @@
 """
-ADT voor rood-zwartboom
+ADT contract voor rood-zwartboom
 """
 
 from graphviz import Graph

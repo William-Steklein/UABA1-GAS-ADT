@@ -1,5 +1,5 @@
 """
-ADT voor queue
+ADT contract voor queue
 """
 
 class QueueNode:
@@ -134,22 +134,6 @@ class Queue:
             return self.front.value, True
         else:
             return None, False
-
-# # Testing
-# if __name__ == "__main__":
-#     q = Queue()
-#     q2 = Queue()
-#
-#     for i in range(1, 11):
-#         q.enqueue(i)
-#     q.print()
-#
-#     l = [1]
-#
-#     q2.load(l)
-#     q2.print()
-#     print(q2.dequeue())
-#     print(q2.dequeue())
 
 if __name__ == "__main__":
     q = Queue()

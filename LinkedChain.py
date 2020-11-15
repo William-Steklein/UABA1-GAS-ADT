@@ -1,9 +1,15 @@
 """
-ADT voor dubbel gelinkte circulaire ketting
+ADT contract voor circulaire dubbelgelinkte ketting
 """
 
 class LCNode:
     def __init__(self, item=None, next_node=None, prev_node=None):
+        """
+        Creëer een knoop voor een circulaire dubbelgelinkte ketting.
+        :param item: waarde
+        :param next_node: volgende knoop
+        :param prev_node: vorige knoop
+        """
         self.item = item
         self.next = next_node
         self.prev = prev_node
@@ -11,18 +17,21 @@ class LCNode:
 
 class LinkedChain:
     def __init__(self):
+        """
+        Creëert een lege circulaire dubbelgelinkte ketting.
+        """
         self.head = None
         self.count = 0
 
-    def load(self, DGCLijst):
+    def load(self, LC_lijst):
         """
-        Laadt de dubbel gelinkte circulaire ketting uit een lijst.
-        :param DGCLijst: lijst met items
+        Laadt de circulaire dubbelgelinkte ketting uit een lijst.
+        :param LC_lijst: lijst met items
         :return: None
         """
         # Creëer van elk item in de lijst een DGCNode
         nodes = []
-        for item in DGCLijst:
+        for item in LC_lijst:
             self.count += 1
             nodes.append(LCNode(item))
 
@@ -42,7 +51,7 @@ class LinkedChain:
 
     def save(self):
         """
-        Slaagt de dubbel gelinkte circulaire ketting op in een lijst.
+        Slaagt de circulaire dubbelgelinkte ketting op in een lijst.
         :return: lijst
         """
         # Return een lege lijst als de ketting leeg is
@@ -50,26 +59,42 @@ class LinkedChain:
             return []
 
         # Creëer een lege lijst en zet de eerste node als de huidige node
-        DGCLijst = []
+        LC_lijst = []
         node = self.head
 
-        # Doorloop alle nodes en voeg die toe aan de DGCLijst
+        # Doorloop alle nodes en voeg die toe aan de LC_lijst
         while True:
-            DGCLijst.append(node.item)
+            LC_lijst.append(node.item)
             node = node.next
             if node == self.head:
-                return DGCLijst
+                return LC_lijst
 
     def print(self):
         """
-        Print de dubbel gelinkte circulaire kettin op het scherm.
+        Print de circulaire dubbelgelinkte ketting op het scherm.
         :return: None
         """
         print(self.save())
 
+    def isEmpty(self):
+        """
+        Bepaalt of de circulaire dubbelgelinkte ketting leeg is.
+        :return: boolean
+        """
+        if self.head is None:
+            return True
+        return False
+
+    def getLength(self):
+        """
+        Geeft de lengte van de circulaire dubbelgelinkte ketting terug.
+        :return: int
+        """
+        return self.count
+
     def insert(self, n, newItem):
         """
-        Voegt het element 'newItem' toe op positie n in de dubbel gelinkte circulaire kettin.
+        Voegt het element 'newItem' toe op positie n in de circulaire dubbelgelinkte ketting.
         :param newItem: waarde
         :param n: index
         :return: None
@@ -128,14 +153,19 @@ class LinkedChain:
         # succes
         return True
 
-    def delete(self, index):
+    def delete(self, n):
         """
-        Verwijdert het element met item als waarde uit de dubbel gelinkte circulaire ketting
-        :param item: value
+        Verwijdert het element op positie n uit de circulaire dubbelgelinkte ketting.
+        :param n: positie van het element
         :return: boolean
         """
+        if n <= 0:
+            return False
+
+        n -= 1
+
         # Zoek de te verwijderen node
-        current_node = self.retrieveNode(index)
+        current_node = self.retrieveNode(n)
         if current_node is None:
             return False
 
@@ -153,30 +183,10 @@ class LinkedChain:
 
         return True
 
-    def findNode(self, item):
+    def retrieveNode(self, n):
         """
-        Geeft de node die item als waarde bevat terug.
-        :param item: value
-        :return: LCNode
-        """
-        # Doorloop alle nodes
-        current_node = self.head
-        while True:
-            # Return de node als item gelijk is aan de waarde van de node
-            if current_node.item == item:
-                return current_node
-
-            # Ga naar de volgende node
-            current_node = current_node.next
-
-            # Als current_node gelijk is aan de eerste stop met doorlopen
-            if current_node == self.head:
-                return None
-
-    def retrieveNode(self, index):
-        """
-        Geeft de node die op plaats index staat terug.
-        :param index: index van de lijst
+        Geeft de knoop die op positie n staat in de circulaire dubbelgelinkte ketting terug.
+        :param n: positie van de node
         :return: LCNode
         """
         if self.head is None:
@@ -184,41 +194,29 @@ class LinkedChain:
 
         # Doorloop de nodes tot aan index
         current_node = self.head
-        for i in range(index):
+        for i in range(n):
             current_node = current_node.next
 
         return current_node
 
-    def retrieve(self, index):
+    def retrieve(self, n):
         """
-        Geeft het element op positie n terug
-        :param index: index van de lijst
+        Geeft het element op positie n terug in de circulaire dubbelgelinkte ketting.
+        :param n: positie van de item
         :return: value
         """
-        index -= 1
-        node = self.retrieveNode(index)
+        n -= 1
+        node = self.retrieveNode(n)
         if node is not None:
             return node.item, True
         else:
             return None, False
 
-    def isEmpty(self):
-        """
-        Bepaalt of de ketting leeg is.
-        :return: boolean
-        """
-        if self.head is None:
-            return True
-        return False
-
-    def getLength(self):
-        """
-        Geeft de lengte van de ketting terug.
-        :return: int
-        """
-        return self.count
-
     def clear(self):
+        """
+        Wist de circulaire dubbelgelinkte ketting.
+        :return: success (boolean)
+        """
         # Laat de headpointer wijzen naar None en zet de counter terug op 0
         self.head = None
         self.count = 0
@@ -228,47 +226,30 @@ class LinkedChain:
 
 if __name__ == "__main__":
     l = LinkedChain()
-    for i in range(1, 11):
+
+    for i in range(10):
         l.insert(1, i)
+    print(l.save())
 
-    l.clear()
-    l.print()
+    l.delete(11)
+
+    print(l.save())
 
 
-
-# inginious testing
-# if __name__ == "__main__":
-#     l = LinkedChain()
-#     print(l.isEmpty())
-#     print(l.getLength())
-#     print(l.retrieve(4)[1])
-#     print(l.insert(4,500))
-#     print(l.isEmpty())
-#     print(l.insert(1,500))
-#     print(l.retrieve(1)[0])
-#     print(l.retrieve(1)[1])
-#     print(l.save())
-#     print(l.insert(1,600))
-#     print(l.save())
-#     l.load([10,-9,15])
-#     l.insert(3,20)
-#     print(l.delete(0))
-#     print(l.save())
-#     print(l.delete(10))
-#     print(l.save())
-
-# True
-# 0
-# False
-# False
-# True
-# True
-# 500
-# True
-# [500]
-# True
-# [600, 500]
-# False
-# [10, -9, 20, 15]
-# True
-# [-9, 20, 15]
+    # print(l.isEmpty())
+    # print(l.getLength())
+    # print(l.retrieve(4)[1])
+    # print(l.insert(4,500))
+    # print(l.isEmpty())
+    # print(l.insert(1,500))
+    # print(l.retrieve(1)[0])
+    # print(l.retrieve(1)[1])
+    # print(l.save())
+    # print(l.insert(1,600))
+    # print(l.save())
+    # l.load([10,-9,15])
+    # l.insert(3,20)
+    # print(l.delete(0))
+    # print(l.save())
+    # print(l.delete(1))
+    # print(l.save())

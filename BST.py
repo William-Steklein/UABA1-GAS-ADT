@@ -1,5 +1,5 @@
 """
-ADT voor binaire zoekboom
+ADT contract voor binaire zoekboom
 """
 
 from graphviz import Graph
@@ -19,14 +19,11 @@ class BSTNode:
         self.left = None
         self.right = None
 
-    def print(self):
-        print(self.key, self.value)
-
 
 class BST:
     def __init__(self, root=None, count=0):
         """
-        Creëer een lege binaire zoekboom.
+        Creëert een lege binaire zoekboom.
         """
         self.root = root
         self.count = count
@@ -35,7 +32,7 @@ class BST:
         """
         Laadt de binaire zoekboom uit een dictionary.
         :param BSTDict: dictionary
-        :return: BinarySearchTree object
+        :return: None
         """
         if start:
             # Als de dictionary leeg is
@@ -130,42 +127,6 @@ class BST:
             self.print(depth + 1, node.right, False)
         else:
             print('%s' % (((depth + 1) * '\t') + "None"))
-
-    def toDot(self, print_value=False, current_node=None, dot=None, start=True):
-        """
-        Maakt een afbeelding van de binaire boom
-        :param print_value: True: print de waarden van de nodes False: print geen waarden
-        :return: None
-        """
-        # Zet in het begin de current_node gelijk aan die van de root
-        if start:
-            if self.root is None:
-                print("Dot: lege BST!")
-                return
-            current_node = self.root
-
-            # Maak een dot object
-            name = f"tree" # f"tree{self.id}"
-            dot = Graph(comment=name, format='png', graph_attr={"splines": "false"})
-
-        if not print_value:
-            dot.node(str(current_node.key), str(current_node.key))
-        else:
-            dot.node(str(current_node.key), str(current_node.key) + "\n" + str(current_node.value))
-
-        # Doorloop de linkerdeelboom van de node
-        if current_node.left is not None:
-            self.toDot(print_value, current_node.left, dot, False)
-            dot.edge(str(current_node.key)+":sw", str(current_node.left.key))
-
-        # Doorloop de rechterdeelboom van de node
-        if current_node.right is not None:
-            self.toDot(print_value, current_node.right, dot, False)
-            dot.edge(str(current_node.key)+":se", str(current_node.right.key))
-
-        if start:
-            # Geef de binaire zoekboom weer
-            dot.render(f'test-output/{name}.gv', view=True)
 
     def isEmpty(self):
         """
@@ -380,13 +341,6 @@ class BST:
                 self.count -= 1
                 return True
 
-    def clear(self):
-        """
-        Wist de binaire zoekboom.
-        :return: None
-        """
-        self.root = None
-
     def getNode(self, key, current_node=None, start=True):
         """
         Geeft de node terug die de search key bevat.
@@ -458,6 +412,13 @@ class BST:
         if start:
             return False
 
+    def clear(self):
+        """
+        Wist de binaire zoekboom.
+        :return: None
+        """
+        self.root = None
+
     def preorderTraverse(self, current_node=None, start=True):
         """
         Doorloopt de knopen in de binaire zoekboom in preorder.
@@ -527,6 +488,67 @@ class BST:
         # Print de searchkey van de huidige node
         print(current_node.key)
 
+    def traverse(self, current_node=None, start=True):
+        """
+        Doorloopt de knopen in de binaire zoekboom en geeft een lijst terug.
+        :return:
+        """
+        # Zet in het begin de current_node gelijk aan die van de root
+        if start:
+            if self.root is None:
+                return []
+            current_node = self.root
+        l = []
+
+        # Doorloop de linkerdeelboom van de node
+        if current_node.left is not None:
+            l += self.traverse(current_node.left, False)
+
+        # Print de searchkey van de huidige node
+        l.append(current_node.key)
+
+        # Doorloop de rechterdeelboom van de node
+        if current_node.right is not None:
+            l += self.traverse(current_node.right, False)
+
+        return l
+
+    def toDot(self, print_value=False, current_node=None, dot=None, start=True):
+        """
+        Maakt een afbeelding van de binaire boom
+        :param print_value: True: print de waarden van de nodes False: print geen waarden
+        :return: None
+        """
+        # Zet in het begin de current_node gelijk aan die van de root
+        if start:
+            if self.root is None:
+                print("Dot: lege BST!")
+                return
+            current_node = self.root
+
+            # Maak een dot object
+            name = f"tree" # f"tree{self.id}"
+            dot = Graph(comment=name, format='png', graph_attr={"splines": "false"})
+
+        if not print_value:
+            dot.node(str(current_node.key), str(current_node.key))
+        else:
+            dot.node(str(current_node.key), str(current_node.key) + "\n" + str(current_node.value))
+
+        # Doorloop de linkerdeelboom van de node
+        if current_node.left is not None:
+            self.toDot(print_value, current_node.left, dot, False)
+            dot.edge(str(current_node.key)+":sw", str(current_node.left.key))
+
+        # Doorloop de rechterdeelboom van de node
+        if current_node.right is not None:
+            self.toDot(print_value, current_node.right, dot, False)
+            dot.edge(str(current_node.key)+":se", str(current_node.right.key))
+
+        if start:
+            # Geef de binaire zoekboom weer
+            dot.render(f'test-output/{name}.gv', view=True)
+
 
 # Testing
 if __name__ == "__main__":
@@ -545,6 +567,7 @@ if __name__ == "__main__":
 
     boom = BST()
     boom.load(d)
+    print(boom.traverse())
 
     # for i in range(25, 31):
     #     boom.searchTreeInsert(createTreeItem(i, "new"))
