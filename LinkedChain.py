@@ -128,14 +128,14 @@ class LinkedChain:
         # succes
         return True
 
-    def delete(self, item):
+    def delete(self, index):
         """
         Verwijdert het element met item als waarde uit de dubbel gelinkte circulaire ketting
         :param item: value
         :return: boolean
         """
         # Zoek de te verwijderen node
-        current_node = self.findNode(item)
+        current_node = self.retrieveNode(index)
         if current_node is None:
             return False
 

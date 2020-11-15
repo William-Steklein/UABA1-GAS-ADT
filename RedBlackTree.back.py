@@ -152,7 +152,6 @@ class RedBlackTree:
         """
         self.root = None
         self.count = 0
-        self.NULLNode = RBTNode()
 
     def load(self, RBTDict, node=None, start=True):
         """
@@ -186,18 +185,11 @@ class RedBlackTree:
                 node.left = RBTNode()
                 node.left.parent = node
                 self.load(RBTDict['children'][0], node.left, False)
-            else:
-                node.left = self.NULLNode
 
             if RBTDict['children'][1] is not None:
                 node.right = RBTNode()
                 node.right.parent = node
                 self.load(RBTDict['children'][1], node.right, False)
-            else:
-                node.right = self.NULLNode
-        else:
-            node.left = self.NULLNode
-            node.right = self.NULLNode
 
     def save(self, addvalues=False, node=None, start=True):
         """
@@ -224,11 +216,11 @@ class RedBlackTree:
             RBTDict['color'] = node.color
 
         # Als de node kinderen heeft
-        if not (node.left == self.NULLNode and node.right == self.NULLNode):
+        if not (node.left is None and node.right is None):
             RBTDict['children'] = []
             # Save the children!
             for child in [node.left, node.right]:
-                if child != self.NULLNode:
+                if child is not None:
                     RBTDict['children'].append(self.save(addvalues, child, False))
                 else:
                     RBTDict['children'].append(None)
@@ -266,12 +258,12 @@ class RedBlackTree:
                 dot.node(str(current_node.key), str(current_node.key) + "\n" + str(current_node.value))
 
         # Doorloop de linkerdeelboom van de node
-        if current_node.left != self.NULLNode:
+        if current_node.left is not None:
             self.toDot(v, print_value, current_node.left, dot, False)
             dot.edge(str(current_node.key)+":sw", str(current_node.left.key))
 
         # Doorloop de rechterdeelboom van de node
-        if current_node.right != self.NULLNode:
+        if current_node.right is not None:
             self.toDot(v, print_value, current_node.right, dot, False)
             dot.edge(str(current_node.key)+":se", str(current_node.right.key))
 
@@ -297,17 +289,17 @@ class RedBlackTree:
             print('%s' % ((depth * '\t') + "|R| " + str(node.key) + ": " + str(node.value)))
 
         # Als beide kinderen None zijn dan return
-        if node.left == self.NULLNode and node.right == self.NULLNode:
+        if node.left is None and node.right is None:
             return
 
         # Print linkerkind
-        if node.left != self.NULLNode:
+        if node.left is not None:
             self.print(depth + 1, node.left, False)
         else:
             print('%s' % (((depth + 1) * '\t') + "None"))
 
         # Print rechterkind
-        if node.right != self.NULLNode:
+        if node.right is not None:
             self.print(depth + 1, node.right, False)
         else:
             print('%s' % (((depth + 1) * '\t') + "None"))
@@ -334,18 +326,18 @@ class RedBlackTree:
             current_node = self.root
 
         # Geef 1 terug als de node geen kinderen heeft
-        if current_node.left == self.NULLNode and current_node.right == self.NULLNode:
+        if current_node.left is None and current_node.right is None:
             return 1
 
         # Zoek de grootste hoogte bij de kinderen
         else:
             max_height = 0
-            if current_node.left != self.NULLNode:
+            if current_node.left is not None:
                 temp = self.getHeight(current_node.left, False)
                 if temp > max_height:
                     max_height = temp
 
-            if current_node.right != self.NULLNode:
+            if current_node.right is not None:
                 temp = self.getHeight(current_node.right, False)
                 if temp > max_height:
                     max_height = temp
@@ -572,9 +564,6 @@ class RedBlackTree:
             # Als de boom leeg is
             if self.root is None:
                 self.root = RBTNode(key, value, "black")
-                self.root.left = self.NULLNode
-                self.root.right = self.NULLNode
-
                 self.count += 1
                 return True
             self.insertItem(None, key, value, self.root, False)
@@ -585,10 +574,8 @@ class RedBlackTree:
             # Verschillende situaties
             self.split4node(current_node)
 
-        if key < current_node.key and current_node.left == self.NULLNode:
+        if key < current_node.key and current_node.left is None:
             current_node.left = RBTNode(key, value, "red", parent=current_node)
-            current_node.left.left = self.NULLNode
-            current_node.left.right = self.NULLNode
             new_node = current_node.left
             self.count += 1
 
@@ -612,13 +599,11 @@ class RedBlackTree:
 
             return True
 
-        elif key < current_node.key and current_node.left != self.NULLNode:
+        elif key < current_node.key and current_node.left is not None:
             self.insertItem(None, key, value, current_node.left, False)
 
-        elif key > current_node.key and current_node.right == self.NULLNode:
+        elif key > current_node.key and current_node.right is None:
             current_node.right = RBTNode(key, value, "red", parent=current_node)
-            current_node.right.left = self.NULLNode
-            current_node.right.right = self.NULLNode
             new_node = current_node.right
             self.count += 1
 
@@ -638,7 +623,7 @@ class RedBlackTree:
 
             return True
 
-        elif key > current_node.key and current_node.right != self.NULLNode:
+        elif key > current_node.key and current_node.right is not None:
             self.insertItem(None, key, value, current_node.right, False)
 
     def leftredistribute(self, current_node):
@@ -892,28 +877,24 @@ class RedBlackTree:
 
         # Ga eerst 1 keer naar rechts
         if not left:
-            if current_node.right != self.NULLNode:
+            if current_node.right is not None:
                 return self.deleteSearchInorderSuccessor(current_node.right, True)
             else:
                 return current_node
         # Blijf links gaan tot een blad
         else:
-            if current_node.left != self.NULLNode:
+            if current_node.left is not None:
                 return self.deleteSearchInorderSuccessor(current_node.left, True)
             else:
                 return current_node
 
     def deleteItem(self, key):
         """
-        Verwijdert de node dat het gegeven key bevat.
+        Verwijdert de node dat het gegeven Entry bevat.
         :return: boolean
         """
         # Zoek de node die het te verwijderen item bevat en
         # vorm elke 2-knoop (behalve de wortel) op dit pad om tot 3-knoop of een 4-knoop
-        if self.root.key == key:
-            if self.root.left == self.NULLNode and self.root.right == self.NULLNode:
-                self.root = None
-
         delete_node = self.deleteSearchNode(key)
         if delete_node is None:
             return False
@@ -921,33 +902,10 @@ class RedBlackTree:
         # Zoek de inorder successor van de node
         inosuc = self.deleteSearchInorderSuccessor(delete_node)
 
-        # Swap de items van de nodes
-        delete_node.key = inosuc.key
-        delete_node.value = inosuc.value
+        # Swap de nodes
 
-        # verwijder inorder successor
-        if inosuc.color == "red":
-            if inosuc.isLeftChild():
-                inosuc.parent.left = self.NULLNode
-            else:
-                inosuc.parent.right = self.NULLNode
-        else:
-            if inosuc.is3node():
-                if inosuc.left.color == "red":
-                    self.rightRotate(inosuc)
-                    inosuc.parent.switchColor()
-                    inosuc.parent.right = self.NULLNode
-                else:
-                    self.leftRotate(inosuc)
-                    inosuc.parent.switchColor()
-                    inosuc.parent.left = self.NULLNode
-            elif inosuc.is4node():
-                self.leftRotate(inosuc)
-                inosuc.parent.parent.switchColor()
-                inosuc.parent.left = self.NULLNode
 
-        self.count -= 1
-        return True
+        # Delete het blad en corrigeer
 
     def clear(self):
         """
@@ -975,13 +933,13 @@ class RedBlackTree:
         # Zoek bij de kinderen
         else:
             # Als de key kleiner is dan de key van de huidige node
-            if key < current_node.key and current_node.left != self.NULLNode:
+            if key < current_node.key and current_node.left is not None:
                 temp = self.getNode(key, current_node.left, False)
                 if temp is not None:
                     return temp
 
             # Als de key groter is dan de key van de huidige node
-            if key > current_node.key and current_node.right != self.NULLNode:
+            if key > current_node.key and current_node.right is not None:
                 temp = self.getNode(key, current_node.right, False)
                 if temp is not None:
                     return temp
@@ -1014,11 +972,11 @@ class RedBlackTree:
 
         # Zoek bij de kinderen
         else:
-            if node.left != self.NULLNode:
+            if node.left is not None:
                 temp = self.contains(data, node.left, False)
                 if temp is not None:
                     return temp
-            if node.right != self.NULLNode:
+            if node.right is not None:
                 temp = self.contains(data, node.right, False)
                 if temp is not None:
                     return temp
@@ -1043,11 +1001,11 @@ class RedBlackTree:
         print(current_node.key)
 
         # Doorloop de linkerdeelboom van de node
-        if current_node.left != self.NULLNode:
+        if current_node.left is not None:
             self.preorderTraverse(current_node.left, False)
 
         # Doorloop de rechterdeelboom van de node
-        if current_node.right != self.NULLNode:
+        if current_node.right is not None:
             self.preorderTraverse(current_node.right, False)
 
     def inorderTraverse(self, current_node=None, start=True):
@@ -1063,14 +1021,14 @@ class RedBlackTree:
             current_node = self.root
 
         # Doorloop de linkerdeelboom van de node
-        if current_node.left != self.NULLNode:
+        if current_node.left is not None:
             self.inorderTraverse(current_node.left, False)
 
         # Print de searchkey van de huidige node
         print(current_node.key)
 
         # Doorloop de rechterdeelboom van de node
-        if current_node.right != self.NULLNode:
+        if current_node.right is not None:
             self.inorderTraverse(current_node.right, False)
 
     def postorderTraverse(self, current_node=None, start=True):
@@ -1086,11 +1044,11 @@ class RedBlackTree:
             current_node = self.root
 
         # Doorloop de linkerdeelboom van de node
-        if current_node.left != self.NULLNode:
+        if current_node.left is not None:
             self.postorderTraverse(current_node.left, False)
 
         # Doorloop de rechterdeelboom van de node
-        if current_node.right != self.NULLNode:
+        if current_node.right is not None:
             self.postorderTraverse(current_node.right, False)
 
         # Print de searchkey van de huidige node
@@ -1117,7 +1075,7 @@ class RedBlackTree:
 
         else:
             # Kijk na of dat de node een ouder heeft
-            if current_node.parent is None or current_node.parent == self.NULLNode:
+            if current_node.parent is None:
                 print(f"---{current_node.key} heeft geen ouder!---")
             else:
                 if current_node.isLeftChild():
@@ -1131,11 +1089,11 @@ class RedBlackTree:
         blackcountr = 0
 
         # Doorloop de linkerdeelboom van de node
-        if current_node.left != self.NULLNode:
+        if current_node.left is not None:
             blackcountl = self.check(current_node.left, False)
 
         # Doorloop de rechterdeelboom van de node
-        if current_node.right != self.NULLNode:
+        if current_node.right is not None:
             blackcountr = self.check(current_node.right, False)
 
         if blackcountl != blackcountr:
@@ -1159,38 +1117,6 @@ if __name__ == "__main__":
                 shutil.rmtree(file_path)
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
-
-    boom = RedBlackTree()
-    l = list(range(0, 100))
-    shuffle(l)
-    print(l)
-    # l2 = [7, 15, 19, 10, 17, 18, 14, 16, 8, 13, 9, 12, 5, 1, 11, 0, 6, 4, 2, 3]
-    # l = [10, 49, 14, 30, 34, 25, 23, 36, 11, 5, 32, 41, 28, 19, 46, 6, 0, 13, 43, 26, 40, 2, 9, 47, 45, 39, 1, 12, 22, 38, 17, 18, 42, 35, 15, 29, 31, 27, 48, 33, 24, 37, 3, 16, 7, 20, 44, 8, 4, 21]
-    for i in l:
-        item = createTreeItem(i)
-        boom.insertItem(item)
-        # boom.toDot()
-        # print(f"{i} has been inserted")
-        # boom.check()
-
-    # boom.toDot()
-
-    d2 = boom.save()
-
-    boom2 = RedBlackTree()
-    boom2.load(d2)
-
-    boom.toDot(True)
-    boom2.toDot(True)
-
-    # l2 = l[:]
-    # shuffle(l2)
-    #
-    # for i in l2:
-    #     print(i)
-    #     boom.deleteItem(i)
-    #
-    #     # boom.toDot()
 
     # # Demo11 herverdelen met 3node parent v3
     #
@@ -1221,6 +1147,30 @@ if __name__ == "__main__":
     #
     #
     # boom.toDot(True)
+
+    boom = RedBlackTree()
+    l = list(range(0, 20))
+    shuffle(l)
+    print(l)
+    l2 = [7, 15, 19, 10, 17, 18, 14, 16, 8, 13, 9, 12, 5, 1, 11, 0, 6, 4, 2, 3]
+    # l = [0, 9, 3, 13, 11, 14, 15, 6, 10, 4, 8, 5, 18, 17, 1, 16, 12, 19, 2, 7]
+    for i in l2:
+        item = createTreeItem(i)
+        boom.insertItem(item)
+        # boom.toDot()
+        # print(f"{i} has been inserted")
+        # boom.check()
+
+    boom.toDot()
+    boom.check()
+
+    node = boom.deleteSearchNode(14)
+    boom.toDot()
+    boom.mergeOrRedistribute(node)
+
+    boom.check()
+
+    boom.toDot(True)
 
     # Demo 10 deleteSearch test
 
