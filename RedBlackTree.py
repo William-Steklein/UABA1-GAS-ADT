@@ -235,50 +235,6 @@ class RedBlackTree:
 
         return RBTDict
 
-    def toDot(self, v=False, print_value=False, current_node=None, dot=None, start=True):
-        """
-        Maakt een afbeelding van de rood-zwartboom
-        :param print_value: True: print de waarden van de nodes False: print geen waarden
-        :return: None
-        """
-        # Zet in het begin de current_node gelijk aan die van de root
-        if start:
-            if self.root is None:
-                print("Dot: lege BST!")
-                return
-            current_node = self.root
-
-            # Maak een dot object
-            name = f"redblacktree{RedBlackTree.counter}" # f"tree{self.id}"
-            RedBlackTree.counter += 1
-            dot = Graph(comment=name, format='png', graph_attr={"splines": "false"})
-
-        # Maak een node met de kleur van de node
-        if current_node.color == "red":
-            if not print_value:
-                dot.node(str(current_node.key), str(current_node.key), color="red")
-            else:
-                dot.node(str(current_node.key), str(current_node.key) + "\n" + str(current_node.value), color="red")
-        else:
-            if not print_value:
-                dot.node(str(current_node.key), str(current_node.key))
-            else:
-                dot.node(str(current_node.key), str(current_node.key) + "\n" + str(current_node.value))
-
-        # Doorloop de linkerdeelboom van de node
-        if current_node.left != self.NULLNode:
-            self.toDot(v, print_value, current_node.left, dot, False)
-            dot.edge(str(current_node.key)+":sw", str(current_node.left.key))
-
-        # Doorloop de rechterdeelboom van de node
-        if current_node.right != self.NULLNode:
-            self.toDot(v, print_value, current_node.right, dot, False)
-            dot.edge(str(current_node.key)+":se", str(current_node.right.key))
-
-        if start:
-            # Slaag de rood-zwartboom op en geef die weer als gevraagt is
-            dot.render(f'test-output/{name}.gv', view=v)
-
     def print(self, depth=0, node=None, start=True):
         """
         Print de rood-zwartboom in de console.
@@ -880,8 +836,12 @@ class RedBlackTree:
         if key == current_node.key:
             return current_node
         elif key < current_node.key and current_node.left is not None:
+            if current_node.left == self.NULLNode:
+                return None
             return self.deleteSearchNode(key, current_node.left, False)
         elif key > current_node.key and current_node.right is not None:
+            if current_node.right == self.NULLNode:
+                return None
             return self.deleteSearchNode(key, current_node.right, False)
         else:
             return None
@@ -986,7 +946,7 @@ class RedBlackTree:
                 if temp is not None:
                     return temp
 
-    def searchTreeRetrieve(self, key):
+    def retrieveItem(self, key):
         """
         Geeft een waarde terug uit de rood-zwartboom mbv de searchkey.
         :param key: search key (int of string)
@@ -1027,7 +987,7 @@ class RedBlackTree:
         if start:
             return False
 
-    def preorderTraverse(self, current_node=None, start=True):
+    def preorderTraverse(self, functionType, current_node=None, start=True):
         """
         Doorloopt de knopen in de rood-zwartboom in preorder.
         :return: None
@@ -1040,17 +1000,17 @@ class RedBlackTree:
             current_node = self.root
 
         # Print de searchkey van de huidige node
-        print(current_node.key)
+        functionType(current_node.key)
 
         # Doorloop de linkerdeelboom van de node
         if current_node.left != self.NULLNode:
-            self.preorderTraverse(current_node.left, False)
+            self.preorderTraverse(functionType, current_node.left, False)
 
         # Doorloop de rechterdeelboom van de node
         if current_node.right != self.NULLNode:
-            self.preorderTraverse(current_node.right, False)
+            self.preorderTraverse(functionType, current_node.right, False)
 
-    def inorderTraverse(self, current_node=None, start=True):
+    def inorderTraverse(self, functionType, current_node=None, start=True):
         """
         Doorloopt de knopen in de rood-zwartboom in inorder.
         :return: None
@@ -1064,16 +1024,16 @@ class RedBlackTree:
 
         # Doorloop de linkerdeelboom van de node
         if current_node.left != self.NULLNode:
-            self.inorderTraverse(current_node.left, False)
+            self.inorderTraverse(functionType, current_node.left, False)
 
         # Print de searchkey van de huidige node
-        print(current_node.key)
+        functionType(current_node.key)
 
         # Doorloop de rechterdeelboom van de node
         if current_node.right != self.NULLNode:
-            self.inorderTraverse(current_node.right, False)
+            self.inorderTraverse(functionType, current_node.right, False)
 
-    def postorderTraverse(self, current_node=None, start=True):
+    def postorderTraverse(self, functionType, current_node=None, start=True):
         """
         Doorloopt de knopen in de rood-zwartboom in postorder.
         :return: None
@@ -1087,14 +1047,14 @@ class RedBlackTree:
 
         # Doorloop de linkerdeelboom van de node
         if current_node.left != self.NULLNode:
-            self.postorderTraverse(current_node.left, False)
+            self.postorderTraverse(functionType, current_node.left, False)
 
         # Doorloop de rechterdeelboom van de node
         if current_node.right != self.NULLNode:
-            self.postorderTraverse(current_node.right, False)
+            self.postorderTraverse(functionType, current_node.right, False)
 
         # Print de searchkey van de huidige node
-        print(current_node.key)
+        functionType(current_node.key)
 
     def check(self, current_node=None, start=True):
         """
@@ -1147,41 +1107,106 @@ class RedBlackTree:
             else:
                 return blackcountl
 
+    def toDot(self, v=False, print_value=False, current_node=None, dot=None, start=True):
+        """
+        Maakt een afbeelding van de rood-zwartboom
+        :param print_value: True: print de waarden van de nodes False: print geen waarden
+        :return: None
+        """
+        # Zet in het begin de current_node gelijk aan die van de root
+        if start:
+            if self.root is None:
+                print("Dot: lege BST!")
+                return
+            current_node = self.root
+
+            # Maak een dot object
+            name = f"redblacktree{RedBlackTree.counter}" # f"tree{self.id}"
+            RedBlackTree.counter += 1
+            dot = Graph(comment=name, format='png', graph_attr={"splines": "false"})
+
+        # Maak een node met de kleur van de node
+        if current_node.color == "red":
+            if not print_value:
+                dot.node(str(current_node.key), str(current_node.key), color="red")
+            else:
+                dot.node(str(current_node.key), str(current_node.key) + "\n" + str(current_node.value), color="red")
+        else:
+            if not print_value:
+                dot.node(str(current_node.key), str(current_node.key))
+            else:
+                dot.node(str(current_node.key), str(current_node.key) + "\n" + str(current_node.value))
+
+        # Doorloop de linkerdeelboom van de node
+        if current_node.left != self.NULLNode:
+            self.toDot(v, print_value, current_node.left, dot, False)
+            dot.edge(str(current_node.key)+":sw", str(current_node.left.key))
+
+        # Doorloop de rechterdeelboom van de node
+        if current_node.right != self.NULLNode:
+            self.toDot(v, print_value, current_node.right, dot, False)
+            dot.edge(str(current_node.key)+":se", str(current_node.right.key))
+
+        if start:
+            # Slaag de rood-zwartboom op en geef die weer als gevraagt is
+            dot.render(f'test-output/{name}.gv', view=v)
+
 
 if __name__ == "__main__":
-    folder = './test-output'
-    for filename in os.listdir(folder):
-        file_path = os.path.join(folder, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+    t = RedBlackTree()
+    print(t.isEmpty())
+    print(t.insertItem(createTreeItem(8,8)))
+    print(t.insertItem(createTreeItem(5,5)))
+    print(t.insertItem(createTreeItem(10,10)))
+    print(t.insertItem(createTreeItem(15,15)))
+    print(t.isEmpty())
+    print(t.retrieveItem(5)[0])
+    print(t.retrieveItem(5)[1])
+    t.inorderTraverse(print)
+    print(t.save())
+    t.load({'root': 8,'color': 'black','children':[{'root':5,'color': 'black'},{'root':10,'color': 'black'}]})
+    t.insertItem(createTreeItem(15,15))
+    print(t.deleteItem(0))
+    print(t.save())
+    print(t.deleteItem(10))
+    print(t.save())
 
-    boom = RedBlackTree()
-    l = list(range(0, 100))
-    shuffle(l)
-    print(l)
-    # l2 = [7, 15, 19, 10, 17, 18, 14, 16, 8, 13, 9, 12, 5, 1, 11, 0, 6, 4, 2, 3]
-    # l = [10, 49, 14, 30, 34, 25, 23, 36, 11, 5, 32, 41, 28, 19, 46, 6, 0, 13, 43, 26, 40, 2, 9, 47, 45, 39, 1, 12, 22, 38, 17, 18, 42, 35, 15, 29, 31, 27, 48, 33, 24, 37, 3, 16, 7, 20, 44, 8, 4, 21]
-    for i in l:
-        item = createTreeItem(i)
-        boom.insertItem(item)
-        # boom.toDot()
-        # print(f"{i} has been inserted")
-        # boom.check()
+# if __name__ == "__main__":
+#     folder = './test-output'
+#     for filename in os.listdir(folder):
+#         file_path = os.path.join(folder, filename)
+#         try:
+#             if os.path.isfile(file_path) or os.path.islink(file_path):
+#                 os.unlink(file_path)
+#             elif os.path.isdir(file_path):
+#                 shutil.rmtree(file_path)
+#         except Exception as e:
+#             print('Failed to delete %s. Reason: %s' % (file_path, e))
+#
+#     boom = RedBlackTree()
+#     l = list(range(0, 100))
+#     shuffle(l)
+#     print(l)
+#     # l2 = [7, 15, 19, 10, 17, 18, 14, 16, 8, 13, 9, 12, 5, 1, 11, 0, 6, 4, 2, 3]
+#     # l = [10, 49, 14, 30, 34, 25, 23, 36, 11, 5, 32, 41, 28, 19, 46, 6, 0, 13, 43, 26, 40, 2, 9, 47, 45, 39, 1, 12, 22, 38, 17, 18, 42, 35, 15, 29, 31, 27, 48, 33, 24, 37, 3, 16, 7, 20, 44, 8, 4, 21]
+#     for i in l:
+#         item = createTreeItem(i)
+#         boom.insertItem(item)
+#         # boom.toDot()
+#         # print(f"{i} has been inserted")
+#         # boom.check()
+#
+#     # boom.toDot()
+#
+#     d2 = boom.save()
+#
+#     boom2 = RedBlackTree()
+#     boom2.load(d2)
+#
+#     boom.toDot(True)
+#     boom2.toDot(True)
 
-    # boom.toDot()
 
-    d2 = boom.save()
-
-    boom2 = RedBlackTree()
-    boom2.load(d2)
-
-    boom.toDot(True)
-    boom2.toDot(True)
 
     # l2 = l[:]
     # shuffle(l2)
