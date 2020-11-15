@@ -987,7 +987,7 @@ class RedBlackTree:
         if start:
             return False
 
-    def preorderTraverse(self, functionType, current_node=None, start=True):
+    def preorderTraverse(self, FunctionType, current_node=None, start=True):
         """
         Doorloopt de knopen in de rood-zwartboom in preorder.
         :return: None
@@ -1000,17 +1000,17 @@ class RedBlackTree:
             current_node = self.root
 
         # Print de searchkey van de huidige node
-        functionType(current_node.key)
+        FunctionType(current_node.key)
 
         # Doorloop de linkerdeelboom van de node
         if current_node.left != self.NULLNode:
-            self.preorderTraverse(functionType, current_node.left, False)
+            self.preorderTraverse(FunctionType, current_node.left, False)
 
         # Doorloop de rechterdeelboom van de node
         if current_node.right != self.NULLNode:
-            self.preorderTraverse(functionType, current_node.right, False)
+            self.preorderTraverse(FunctionType, current_node.right, False)
 
-    def inorderTraverse(self, functionType, current_node=None, start=True):
+    def inorderTraverse(self, FunctionType, current_node=None, start=True):
         """
         Doorloopt de knopen in de rood-zwartboom in inorder.
         :return: None
@@ -1024,16 +1024,16 @@ class RedBlackTree:
 
         # Doorloop de linkerdeelboom van de node
         if current_node.left != self.NULLNode:
-            self.inorderTraverse(functionType, current_node.left, False)
+            self.inorderTraverse(FunctionType, current_node.left, False)
 
         # Print de searchkey van de huidige node
-        functionType(current_node.key)
+        FunctionType(current_node.key)
 
         # Doorloop de rechterdeelboom van de node
         if current_node.right != self.NULLNode:
-            self.inorderTraverse(functionType, current_node.right, False)
+            self.inorderTraverse(FunctionType, current_node.right, False)
 
-    def postorderTraverse(self, functionType, current_node=None, start=True):
+    def postorderTraverse(self, FunctionType, current_node=None, start=True):
         """
         Doorloopt de knopen in de rood-zwartboom in postorder.
         :return: None
@@ -1047,14 +1047,14 @@ class RedBlackTree:
 
         # Doorloop de linkerdeelboom van de node
         if current_node.left != self.NULLNode:
-            self.postorderTraverse(functionType, current_node.left, False)
+            self.postorderTraverse(FunctionType, current_node.left, False)
 
         # Doorloop de rechterdeelboom van de node
         if current_node.right != self.NULLNode:
-            self.postorderTraverse(functionType, current_node.right, False)
+            self.postorderTraverse(FunctionType, current_node.right, False)
 
         # Print de searchkey van de huidige node
-        functionType(current_node.key)
+        FunctionType(current_node.key)
 
     def check(self, current_node=None, start=True):
         """

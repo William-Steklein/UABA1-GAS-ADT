@@ -226,30 +226,46 @@ class LinkedChain:
 
 if __name__ == "__main__":
     l = LinkedChain()
+    #
+    # for i in range(10):
+    #     l.insert(1, i)
+    # print(l.save())
+    #
+    # l.delete(11)
+    #
+    # print(l.save())
 
-    for i in range(10):
-        l.insert(1, i)
+
+    print(l.isEmpty())
+    print(l.getLength())
+    print(l.retrieve(4)[1])
+    print(l.insert(4,500))
+    print(l.isEmpty())
+    print(l.insert(1,500))
+    print(l.retrieve(1)[0])
+    print(l.retrieve(1)[1])
+    print(l.save())
+    print(l.insert(1,600))
+    print(l.save())
+    l.load([10,-9,15])
+    l.insert(3,20)
+    print(l.delete(0))
+    print(l.save())
+    print(l.delete(1))
     print(l.save())
 
-    l.delete(11)
-
-    print(l.save())
-
-
-    # print(l.isEmpty())
-    # print(l.getLength())
-    # print(l.retrieve(4)[1])
-    # print(l.insert(4,500))
-    # print(l.isEmpty())
-    # print(l.insert(1,500))
-    # print(l.retrieve(1)[0])
-    # print(l.retrieve(1)[1])
-    # print(l.save())
-    # print(l.insert(1,600))
-    # print(l.save())
-    # l.load([10,-9,15])
-    # l.insert(3,20)
-    # print(l.delete(0))
-    # print(l.save())
-    # print(l.delete(1))
-    # print(l.save())
+    # True
+    # 0
+    # False
+    # False
+    # True
+    # True
+    # 500
+    # True
+    # [500]
+    # True
+    # [600, 500]
+    # False
+    # [10, -9, 20, 15]
+    # True
+    # [-9, 20, 15]
