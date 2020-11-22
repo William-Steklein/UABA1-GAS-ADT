@@ -38,6 +38,7 @@ class BST:
             # Als de dictionary leeg is
             if BSTDict is None or BSTDict == {}:
                 return None
+            self.clear()
 
             # Creëer een node in de root
             self.root = BSTNode()

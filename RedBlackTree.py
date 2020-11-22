@@ -868,6 +868,10 @@ class RedBlackTree:
         Verwijdert de node dat het gegeven key bevat.
         :return: boolean
         """
+        # Kijk of dat de node bestaat in de boom
+        if not self.retrieveItem(key)[1]:
+            return False
+
         # Zoek de node die het te verwijderen item bevat en
         # vorm elke 2-knoop (behalve de wortel) op dit pad om tot 3-knoop of een 4-knoop
         if self.root.key == key:
@@ -1152,62 +1156,54 @@ class RedBlackTree:
             dot.render(f'test-output/{name}.gv', view=v)
 
 
-if __name__ == "__main__":
-    t = RedBlackTree()
-    print(t.isEmpty())
-    print(t.insertItem(createTreeItem(8,8)))
-    print(t.insertItem(createTreeItem(5,5)))
-    print(t.insertItem(createTreeItem(10,10)))
-    print(t.insertItem(createTreeItem(15,15)))
-    print(t.isEmpty())
-    print(t.retrieveItem(5)[0])
-    print(t.retrieveItem(5)[1])
-    t.inorderTraverse(print)
-    print(t.save())
-    t.load({'root': 8,'color': 'black','children':[{'root':5,'color': 'black'},{'root':10,'color': 'black'}]})
-    t.insertItem(createTreeItem(15,15))
-    print(t.deleteItem(0))
-    print(t.save())
-    print(t.deleteItem(10))
-    print(t.save())
-
 # if __name__ == "__main__":
-#     folder = './test-output'
-#     for filename in os.listdir(folder):
-#         file_path = os.path.join(folder, filename)
-#         try:
-#             if os.path.isfile(file_path) or os.path.islink(file_path):
-#                 os.unlink(file_path)
-#             elif os.path.isdir(file_path):
-#                 shutil.rmtree(file_path)
-#         except Exception as e:
-#             print('Failed to delete %s. Reason: %s' % (file_path, e))
-#
-#     boom = RedBlackTree()
-#     l = list(range(0, 100))
-#     shuffle(l)
-#     print(l)
-#     # l2 = [7, 15, 19, 10, 17, 18, 14, 16, 8, 13, 9, 12, 5, 1, 11, 0, 6, 4, 2, 3]
-#     # l = [10, 49, 14, 30, 34, 25, 23, 36, 11, 5, 32, 41, 28, 19, 46, 6, 0, 13, 43, 26, 40, 2, 9, 47, 45, 39, 1, 12, 22, 38, 17, 18, 42, 35, 15, 29, 31, 27, 48, 33, 24, 37, 3, 16, 7, 20, 44, 8, 4, 21]
-#     for i in l:
-#         item = createTreeItem(i)
-#         boom.insertItem(item)
-#         # boom.toDot()
-#         # print(f"{i} has been inserted")
-#         # boom.check()
-#
-#     # boom.toDot()
-#
-#     d2 = boom.save()
-#
-#     boom2 = RedBlackTree()
-#     boom2.load(d2)
-#
-#     boom.toDot(True)
-#     boom2.toDot(True)
+#     t = RedBlackTree()
+#     print(t.isEmpty())
+#     print(t.insertItem(createTreeItem(8,8)))
+#     print(t.insertItem(createTreeItem(5,5)))
+#     print(t.insertItem(createTreeItem(10,10)))
+#     print(t.insertItem(createTreeItem(15,15)))
+#     print(t.isEmpty())
+#     print(t.retrieveItem(5)[0])
+#     print(t.retrieveItem(5)[1])
+#     t.inorderTraverse(print)
+#     print(t.save())
+#     t.load({'root': 8,'color': 'black','children':[{'root':5,'color': 'black'},{'root':10,'color': 'black'}]})
+#     t.insertItem(createTreeItem(15,15))
+#     print(t.deleteItem(0))
+#     print(t.save())
+#     print(t.deleteItem(10))
+#     print(t.save())
 
+if __name__ == "__main__":
+    folder = './test-output'
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-
+    # boom = RedBlackTree()
+    # l = list(range(0, 40))
+    # shuffle(l)
+    # print(l)
+    # # l2 = [7, 15, 19, 10, 17, 18, 14, 16, 8, 13, 9, 12, 5, 1, 11, 0, 6, 4, 2, 3]
+    # # l = [10, 49, 14, 30, 34, 25, 23, 36, 11, 5, 32, 41, 28, 19, 46, 6, 0, 13, 43, 26, 40, 2, 9, 47, 45, 39, 1, 12, 22, 38, 17, 18, 42, 35, 15, 29, 31, 27, 48, 33, 24, 37, 3, 16, 7, 20, 44, 8, 4, 21]
+    # for i in l:
+    #     item = createTreeItem(i)
+    #     boom.insertItem(item)
+    #     boom.toDot()
+    #     # print(f"{i} has been inserted")
+    #     # boom.check()
+    #
+    # boom.toDot(True)
+    #
+    #
+    #
     # l2 = l[:]
     # shuffle(l2)
     #
@@ -1215,7 +1211,7 @@ if __name__ == "__main__":
     #     print(i)
     #     boom.deleteItem(i)
     #
-    #     # boom.toDot()
+    #     boom.toDot()
 
     # # Demo11 herverdelen met 3node parent v3
     #
