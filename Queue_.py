@@ -29,7 +29,7 @@ class Queue:
         if not QueueLijst:
             return
         self.front = QueueNode(QueueLijst.pop(-1))
-        # Als de lijst 1 element had
+        # Als de lijst 1 element heeft
         if not QueueLijst:
             self.back = self.front
             return
@@ -41,7 +41,7 @@ class Queue:
             prev_node.next = current_node
             prev_node = current_node
 
-        # Maak de laatste node de back
+        # Maak de laatste knoop de back
         self.back = current_node
 
         return True
@@ -73,8 +73,7 @@ class Queue:
 
     def isEmpty(self):
         """
-        Bepaalt of de queue leeg is.
-
+        Kijkt of de queue leeg is.
         :return: True als leeg en False als niet leeg
         """
         if self.front is None:
@@ -84,7 +83,6 @@ class Queue:
     def enqueue(self, newItem):
         """
         Voegt een element toe aan de queue.
-
         :param newItem: item die wordt toegevoegd
         :return: None
 
@@ -107,14 +105,13 @@ class Queue:
     def dequeue(self):
         """
         Verwijdert het eerst toegevoegde element uit de queue.
-
         :return: het eerst toegevoegde element
 
         postcondities:
             1 item minder in de queue
         """
         if self.front is not None:
-            # Neem de waarde van de front node en return die op het einde
+            # Neem de waarde van de front knoop en return die op het einde
             value = self.front.value
         else:
             return None, False

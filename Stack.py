@@ -50,7 +50,7 @@ class Stack:
             return []
 
         StackLijst = []
-        # maak de top de huidige node
+        # Maak huidige knoop de top
         current_node = self.top
         while True:
             if current_node is None:
@@ -67,9 +67,7 @@ class Stack:
 
     def isEmpty(self):
         """
-        Bepaalt of de stack leeg is
-
-        Bepaalt of een stack leeg is
+        Kijkt of de stack leeg is.
         :return: True als leeg en False als niet leeg
         """
         if self.top is None:
@@ -79,8 +77,7 @@ class Stack:
 
     def push(self, newItem):
         """
-        Voegt een element toe aan de stack
-
+        Voegt een element toe aan de stack.
         :param newItem: item die wordt toegevoegd
         :return: None
 
@@ -99,8 +96,7 @@ class Stack:
 
     def pop(self):
         """
-        Verwijdert het laatst toegevoegde element uit de stack
-
+        Verwijdert het laatst toegevoegde element uit de stack.
         :return: het laatst toegevoegde element
 
         postcondities:
@@ -119,11 +115,9 @@ class Stack:
 
     def getTop(self):
         """
-        Vraagt het laatst toegevoegde element uit de stack op
-
+        Vraagt het laatst toegevoegde element uit de stack op.
         :return: het laatst toegevoegde element
         """
-        # Return de value van de top als het niet None is anders return None
         if self.top is not None:
             return self.top.value, True
         return None, False

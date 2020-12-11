@@ -40,20 +40,20 @@ class BST:
                 return None
             self.clear()
 
-            # Creëer een node in de root
+            # Creëer een knoop voor de wortel
             self.root = BSTNode()
             node = self.root
 
-        # Assign de waarden aan de node
+        # Wijs de waarden aan de knoop toe
         if 'root' in BSTDict:
             node.key = BSTDict.get('root')
         if 'value' in BSTDict:
             node.value = BSTDict.get('value')
 
-        # Voeg 1 toe aan het totaal aantal knopen in de binaire zoekboom
+        # Voeg 1 toe aan het totaal aantal knopen
         self.count += 1
 
-        # Kijk na of de node kinderen heeft
+        # Kijk of de knoop kinderen heeft
         if 'children' in BSTDict:
             if BSTDict['children'][0] is not None:
                 node.left = BSTNode()
@@ -78,7 +78,7 @@ class BST:
 
         BSTDict = {}
 
-        # Voeg de waarden van de node toe in de dictionary
+        # Voeg de waarden van de knoop toe aan de dictionary
         if node.key is not None:
             BSTDict['root'] = node.key
         else:
@@ -87,10 +87,9 @@ class BST:
             BSTDict['value'] = node.value
 
 
-        # Als de node kinderen heeft
+        # Als de knoop kinderen heeft
         if not (node.left is None and node.right is None):
             BSTDict['children'] = []
-            # Save the children!
             for child in [node.left, node.right]:
                 if child is not None:
                     BSTDict['children'].append(self.save(addvalues, child, False))
@@ -110,20 +109,20 @@ class BST:
                 return
             node = self.root
 
-        # Print de huidige node
+        # Print de huidige knoop
         print('%s' % ((depth * '\t') + str(node.key) + ": " + str(node.value)))
 
-        # Als beide kinderen None zijn dan return
+        # Als de knoop geen kinderen heeft
         if node.left is None and node.right is None:
             return
 
-        # Print linkerkind
+        # Print het linkerkind
         if node.left is not None:
             self.print(depth + 1, node.left, False)
         else:
             print('%s' % (((depth + 1) * '\t') + "None"))
 
-        # Print rechterkind
+        # Print het rechterkind
         if node.right is not None:
             self.print(depth + 1, node.right, False)
         else:
@@ -144,13 +143,13 @@ class BST:
         Geeft de hoogte van de binaire zoekboom.
         :return: integer
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 return 0
             current_node = self.root
 
-        # Geef 1 terug als de node geen kinderen heeft
+        # Geef 1 terug als de knoop geen kinderen heeft
         if current_node.left is None and current_node.right is None:
             return 1
 
@@ -167,7 +166,7 @@ class BST:
                 if temp > max_height:
                     max_height = temp
 
-            # Geef 1 + de hoogte van langste pad onder node
+            # Geef 1 + de hoogte van langste pad vanaf een kind van de huidige knoop
             return 1 + max_height
 
     def getNumberOfNodes(self):
@@ -179,7 +178,7 @@ class BST:
 
     def getRootData(self):
         """
-        Geeft de waarde dat in de root van de binaire zoekboom zit.
+        Geeft de waarde dat in de wortel van de binaire zoekboom zit.
         :return: waarde
         """
         return self.root.value
@@ -225,10 +224,10 @@ class BST:
             self.count += 1
             return True
 
-    def inorderSuccessor(self, node, left=False):
+    def inorderSuccessor(self, huidige_node, left=False):
         """
         Geeft de inorder successor van een node.
-        :param node: node
+        :param huidige_node: huidige knoop
         :return: inorder successor van de node
 
         precondities:
@@ -236,16 +235,16 @@ class BST:
         """
         # Ga eerst 1 keer naar rechts
         if not left:
-            if node.right is not None:
-                return self.inorderSuccessor(node.right, True)
+            if huidige_node.right is not None:
+                return self.inorderSuccessor(huidige_node.right, True)
             else:
-                return node
+                return huidige_node
         # Blijf links gaan tot een blad
         else:
-            if node.left is not None:
-                return self.inorderSuccessor(node.left, True)
+            if huidige_node.left is not None:
+                return self.inorderSuccessor(huidige_node.left, True)
             else:
-                return node
+                return huidige_node
 
     def findParent(self, node, current_node=None, start=True):
         """
@@ -276,9 +275,9 @@ class BST:
     def replaceWithChild(self, node, child):
         """
         Vervangt een node met een kind. Het kind van de node wordt het kind van de ouder van de node.
-        Deze functie wordt gebruikt bij de remove method.
-        :param node: node
-        :param child: child van de node
+        Deze functie wordt gebruikt bij searchTreeDelete.
+        :param node: knoop
+        :param child: kind van de knoop
         :return: None
         """
         parent = self.findParent(node)
@@ -289,7 +288,7 @@ class BST:
 
     def searchTreeDelete(self, key, current_node=None, start=True, no_count=False):
         """
-        Verwijdert het item met een gegeven searchkey uit de binaire zoekboom.
+        Verwijdert het item met een gegeven zoeksleutel uit de binaire zoekboom.
         :param key: search key (int of string)
         :return: None
         """
@@ -300,7 +299,7 @@ class BST:
             if current_node is None:
                 return False
 
-        # Als de node geen kinderen heeft
+        # Als de knoop geen kinderen heeft
         if current_node.left is None and current_node.right is None:
             # Vervang de node met None
             self.replaceWithChild(current_node, None)
@@ -310,7 +309,7 @@ class BST:
                 self.count -= 1
                 return True
 
-        # Als de node 1 kind heeft
+        # Als de knoop 1 kind heeft
         elif current_node.left is None or current_node.right is None:
             # Vervang de node met zijn kind
             if current_node.left is None:
@@ -328,11 +327,11 @@ class BST:
                     self.count -= 1
                     return True
 
-        # Als de node 2 kinderen heeft
+        # Als de knoop 2 kinderen heeft
         else:
-            # zoek de inorder successor van de te verwijderen node
+            # zoek de inorder successor van de te verwijderen knoop
             insu = self.inorderSuccessor(current_node)
-            # Vervang de waarden van de node met die van de inorder successor
+            # Vervang de waarden van de knoop met die van de inorder successor
             current_node.key, current_node.value = insu.key, insu.value
             # Verwijder de inorder successor
             self.searchTreeDelete(insu.key, insu, False, True)
@@ -348,25 +347,24 @@ class BST:
         :param key: search key (int of string)
         :return: waarde
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin current_node gelijk aan die van de root
         if start:
             if self.root is None:
                 return
             current_node = self.root
 
-        # return de node als de key van de node gelijk is aan de gegeven key
         if current_node.key == key:
             return current_node
 
         # Zoek bij de kinderen
         else:
-            # Als de key kleiner is dan de key van de huidige node
+            # Als de key kleiner is dan de key van de huidige knoop
             if key < current_node.key and current_node.left is not None:
                 temp = self.getNode(key, current_node.left, False)
                 if temp is not None:
                     return temp
 
-            # Als de key groter is dan de key van de huidige node
+            # Als de key groter is dan de key van de huidige knoop
             if key > current_node.key and current_node.right is not None:
                 temp = self.getNode(key, current_node.right, False)
                 if temp is not None:
@@ -374,7 +372,7 @@ class BST:
 
     def searchTreeRetrieve(self, key):
         """
-        Geeft een specifieke waarde terug uit de binaire zoekboom mbv de searchkey.
+        Geeft een specifieke waarde terug uit de binaire zoekboom mbv de zoeksleutel.
         :param key: search key (int of string)
         :return: waarde
         """
@@ -386,7 +384,7 @@ class BST:
 
     def contains(self, data, node=None, start=True):
         """
-        Bepaalt of dat de gegeven waarde in de boom zit.
+        Kijkt of dat de gegeven waarde in de boom zit.
         :param data: waarde
         :return: boolean
         """
@@ -422,71 +420,71 @@ class BST:
 
     def preorderTraverse(self, current_node=None, start=True):
         """
-        Doorloopt de knopen in de binaire zoekboom in preorder.
+        Doorloopt de knopen in de binaire zoekboom in preorder volgorde.
         :return: None
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 print(None)
                 return
             current_node = self.root
 
-        # Print de searchkey van de huidige node
+        # Print de searchkey van de huidige knoop
         print(current_node.key)
 
-        # Doorloop de linkerdeelboom van de node
+        # Doorloop de linkerdeelboom van de knoop
         if current_node.left is not None:
             self.preorderTraverse(current_node.left, False)
 
-        # Doorloop de rechterdeelboom van de node
+        # Doorloop de rechterdeelboom van de knoop
         if current_node.right is not None:
             self.preorderTraverse(current_node.right, False)
 
     def inorderTraverse(self, current_node=None, start=True):
         """
-        Doorloopt de knopen in de binaire zoekboom in inorder.
+        Doorloopt de knopen in de binaire zoekboom in inorder volgorde.
         :return: None
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 print(None)
                 return
             current_node = self.root
 
-        # Doorloop de linkerdeelboom van de node
+        # Doorloop de linkerdeelboom van de knoop
         if current_node.left is not None:
             self.inorderTraverse(current_node.left, False)
 
-        # Print de searchkey van de huidige node
+        # Print de searchkey van de huidige knoop
         print(current_node.key)
 
-        # Doorloop de rechterdeelboom van de node
+        # Doorloop de rechterdeelboom van de knoop
         if current_node.right is not None:
             self.inorderTraverse(current_node.right, False)
 
     def postorderTraverse(self, current_node=None, start=True):
         """
-        Doorloopt de knopen in de binaire zoekboom in postorder.
+        Doorloopt de knopen in de binaire zoekboom in postorder volgorde.
         :return: None
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 print(None)
                 return
             current_node = self.root
 
-        # Doorloop de linkerdeelboom van de node
+        # Doorloop de linkerdeelboom van de knoop
         if current_node.left is not None:
             self.postorderTraverse(current_node.left, False)
 
-        # Doorloop de rechterdeelboom van de node
+        # Doorloop de rechterdeelboom van de knoop
         if current_node.right is not None:
             self.postorderTraverse(current_node.right, False)
 
-        # Print de searchkey van de huidige node
+        # Print de searchkey van de huidige knoop
         print(current_node.key)
 
     def traverse(self, current_node=None, start=True):
@@ -494,21 +492,21 @@ class BST:
         Doorloopt de knopen in de binaire zoekboom en geeft een lijst terug.
         :return:
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin de current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 return []
             current_node = self.root
         l = []
 
-        # Doorloop de linkerdeelboom van de node
+        # Doorloop de linkerdeelboom van de knoop
         if current_node.left is not None:
             l += self.traverse(current_node.left, False)
 
-        # Print de searchkey van de huidige node
+        # Print de searchkey van de huidige knoop
         l.append(current_node.key)
 
-        # Doorloop de rechterdeelboom van de node
+        # Doorloop de rechterdeelboom van de knoop
         if current_node.right is not None:
             l += self.traverse(current_node.right, False)
 
@@ -517,7 +515,7 @@ class BST:
     def toDot(self, print_value=False, current_node=None, dot=None, start=True):
         """
         Maakt een afbeelding van de binaire boom
-        :param print_value: True: print de waarden van de nodes False: print geen waarden
+        :param print_value: True: print de waarden van de knopen False: print geen waarden
         :return: None
         """
         # Zet in het begin de current_node gelijk aan die van de root

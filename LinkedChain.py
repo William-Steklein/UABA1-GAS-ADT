@@ -29,25 +29,20 @@ class LinkedChain:
         :param LC_lijst: lijst met items
         :return: None
         """
-        # Creëer van elk item in de lijst een DGCNode
-        nodes = []
-        for item in LC_lijst:
-            self.count += 1
-            nodes.append(LCNode(item))
-
-        # Laat de headpointer naar de eerste node wijzen
-        self.head = nodes[0]
-
-        # Laat de eerste node naar de laatste wijzen en de laatste naar de eerste
-        self.head.prev = nodes[-1]
-        nodes[-1].next = self.head
-
-        # Laat elke node (behalve de eerste en de laatste) naar zijn volgende en vorige wijzen
+        # Creëer de head
+        self.head = LCNode(LC_lijst[0])
         prev_node = self.head
-        for n in nodes[1:]:
+
+        # Doorloop alle items in de lijst, maak daar knopen van en laat hun wijzen naar voor en achter
+        for i in LC_lijst[1:]:
+            n = LCNode(i)
             prev_node.next = n
             n.prev = prev_node
             prev_node = n
+
+        # Laat de laatste knoop wijzen naar de head
+        prev_node.next = self.head
+        self.head.prev = prev_node
 
     def save(self):
         """
@@ -58,15 +53,15 @@ class LinkedChain:
         if self.head is None:
             return []
 
-        # Creëer een lege lijst en zet de eerste node als de huidige node
+        # Creëer een lege lijst en zet de eerste knoop gelijk aan current_node
         LC_lijst = []
-        node = self.head
+        current_node = self.head
 
-        # Doorloop alle nodes en voeg die toe aan de LC_lijst
+        # Doorloop alle knopen en voeg die toe aan de LC_lijst
         while True:
-            LC_lijst.append(node.item)
-            node = node.next
-            if node == self.head:
+            LC_lijst.append(current_node.item)
+            current_node = current_node.next
+            if current_node == self.head:
                 return LC_lijst
 
     def print(self):
@@ -78,7 +73,7 @@ class LinkedChain:
 
     def isEmpty(self):
         """
-        Bepaalt of de circulaire dubbelgelinkte ketting leeg is.
+        Kijkt of de circulaire dubbelgelinkte ketting leeg is.
         :return: boolean
         """
         if self.head is None:
@@ -96,14 +91,14 @@ class LinkedChain:
         """
         Voegt het element 'newItem' toe op positie n in de circulaire dubbelgelinkte ketting.
         :param newItem: waarde
-        :param n: index
+        :param n: positie
         :return: None
         """
-        # Als de gegeven index groter is dan de lengte van de ketting
-        if abs(n) > self.getLength() + 1:
+        # Ongeldige positie
+        if n > self.getLength() + 1 or n <= 0:
             return False
-        n -= 1
-        # Als de ketting
+
+        # Lege ketting
         if self.head is None:
                 new_node = LCNode(newItem)
                 new_node.next = new_node
@@ -116,35 +111,30 @@ class LinkedChain:
                 # succes
                 return True
 
-        # Als de index 0 is of - lengte van de ketting - 1 (vooraan in de ketting)
-        elif n == 0 or n == -self.count - 1:
-            n = 0
-            # Neem de laatste node in de lijst
+        # n = 1
+        elif n == 1:
+            # Zet current_node gelijk aan de laatste knoop van de ketting
             current_node = self.head.prev
-        elif n > 0:
-            # Zoek de node dat op positie n + 1 staat
+        elif n > 1:
+            # Zet current_node gelijk aan de knoop op pos n - 1
             current_node = self.head
-            for i in range(n - 1):
+            for i in range(n - 2):
                 current_node = current_node.next
-        else:
-            current_node = self.head.prev
-            for i in range(-n - 1):
-                current_node = current_node.prev
 
-        # Creëer een nieuwe node
+        # Creëer een nieuwe knoop
         new_node = LCNode(newItem)
         # Laat de next pointer naar het eerstvolgende element wijzen
         new_node.next = current_node.next
         # en de prev pionter naar het vorige element wijzen
         new_node.prev = current_node
 
-        # Laat de next pointer van het laatste element wijzen naar de nieuwe node
+        # Laat de next pointer van het laatste element wijzen naar de nieuwe knoop
         current_node.next = new_node
-        # Laat de prev pointer van de node voor de nieuwe node naar de nieuwe node wijzen
+        # Laat de prev pointer van de knoop voor de nieuwe knoop naar de nieuwe knoop wijzen
         new_node.next.prev = new_node
 
-        # Laat de headpointer naar de nieuwe node wijzen als de gegeven index 0 is
-        if n == 0:
+        # Laat de headpointer naar de nieuwe knoop wijzen als de gegeven positie 1 is
+        if n == 1:
             self.head = new_node
 
         # Verhoog de count met 1
@@ -159,12 +149,11 @@ class LinkedChain:
         :param n: positie van het element
         :return: boolean
         """
+        # Ongeldige positie
         if n <= 0:
             return False
 
-        n -= 1
-
-        # Zoek de te verwijderen node
+        # Zoek de te verwijderen knoop
         current_node = self.retrieveNode(n)
         if current_node is None:
             return False
@@ -173,12 +162,11 @@ class LinkedChain:
         if current_node == self.head:
             self.head = current_node.next
 
-        # Laat de pointer van de vorige en de volgende node niet meer naar current_node wijzen,
+        # Laat de pointer van de vorige en de volgende knoop niet meer naar current_node wijzen,
         # maar naar de volgende/vorige in de ketting
         current_node.prev.next = current_node.next
         current_node.next.prev = current_node.prev
 
-        # Verlaag de count met 1
         self.count -= 1
 
         return True
@@ -192,9 +180,9 @@ class LinkedChain:
         if self.head is None:
             return None
 
-        # Doorloop de nodes tot aan index
+        # Doorloop de knopen tot aan de gegeven positie
         current_node = self.head
-        for i in range(n):
+        for i in range(n - 1):
             current_node = current_node.next
 
         return current_node
@@ -205,7 +193,6 @@ class LinkedChain:
         :param n: positie van de item
         :return: value
         """
-        n -= 1
         node = self.retrieveNode(n)
         if node is not None:
             return node.item, True
@@ -228,7 +215,11 @@ if __name__ == "__main__":
     l = LinkedChain()
     #
     # for i in range(10):
+    #     print(l.save())
     #     l.insert(1, i)
+    #
+    # print(l.save())
+    # l.insert(10, "test")
     # print(l.save())
     #
     # l.delete(11)

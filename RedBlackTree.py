@@ -2,18 +2,27 @@
 ADT contract voor rood-zwartboom
 """
 
+import time
 from graphviz import Graph
-import random
 from random import shuffle
 import os, shutil
 
 def createTreeItem(key,val=None):
+    """
+    De items worden in een tuple gestoken en die worden in de insertmethode van de rood-zwartboom terug uitgepakt.
+    (Ik had bij het maken van de roodzwartboom bij de insertmethode key en value als parameters gebruikt en
+    geen rood-zwartknoop.)
+
+    :param key: searchkey
+    :param val: waarde
+    :return: tuple
+    """
     return key, val
 
 class RBTNode:
     def __init__(self, key=None, value=None, color=None, left=None, right=None, parent=None):
         """
-        Creëer een knoop voor een rood zwart boom.
+        Creëert een knoop voor een rood zwart boom.
         """
         self.key = key
         self.value = value
@@ -24,10 +33,10 @@ class RBTNode:
 
     def is2node(self):
         """
-        Kijkt na of dat de node een 2node is
+        Kijkt na of dat de knoop een 2-knoop is. (kan alleen bij zwarte knopen gebruikt worden)
         :return: boolean
         """
-        # Een node is een 2node als beide kinderen zwart zijn
+        # Een knoop is een 2-knoop als beide kinderen zwart zijn
         for child in [self.left, self.right]:
             if child is None:
                 return False
@@ -37,10 +46,10 @@ class RBTNode:
 
     def is3node(self):
         """
-        Kijkt na of dat de node een 3node is
+        Kijkt na of dat de knoop een 3-knoop is. (kan alleen bij zwarte knopen gebruikt worden)
         :return: boolean
         """
-        # Een node is een 3node als 1 kind zwart is en de andere rood
+        # Een knoop is een 3-knoop als 1 kind zwart is en de andere rood
         if self.left is not None and self.right is not None:
             if self.left.color == "red":
                 if self.right.color == "black":
@@ -52,10 +61,10 @@ class RBTNode:
 
     def is4node(self):
         """
-        Kijkt na of dat de node een 4node is
+        Kijkt na of dat de knoop een 4-knoop is (kan alleen bij zwarte knopen gebruikt worden)
         :return: boolean
         """
-        # Een node is een 4node als beide kinderen zwart zijn
+        # Een knoop is een 4-knoop als beide kinderen rood zijn
         for child in [self.left, self.right]:
             if child is None:
                 return False
@@ -65,21 +74,21 @@ class RBTNode:
 
     def isLeftChild(self):
         """
-        Kijkt na of dat de node een linkerkind is
+        Kijkt na of dat de knoop een linkerkind is
         :return: boolean
         """
         return self == self.parent.left
 
     def isRightChild(self):
         """
-        Kijkt na of dat de node een rechterkind is
+        Kijkt na of dat de knoop een rechterkind is.
         :return: boolean
         """
         return self == self.parent.right
 
     def switchColor(self):
         """
-        Wisselt de kleur van de node
+        Wisselt de kleur van de knoop
         :return: None
         """
         if self.color == "red":
@@ -89,23 +98,35 @@ class RBTNode:
 
     def colorChanges(self):
         """
-        Wisselt de kleur van de node en zijn kinderen
+        Wisselt de kleur van de knoop en zijn kinderen
         :return: None
         """
         self.left.switchColor()
         self.right.switchColor()
         self.switchColor()
 
-    def getLeftSibling(self):
+    def getTwoThreeFourParent(self):
+        """
+        Geeft de ouder van de rood-zwartknoop volgens de 2-3-4boom.
+        :return: RBTNode object
+        """
         if self.parent.color == "black":
-            real_parent = self.parent
+            return self.parent
         else:
-            real_parent = self.parent.parent
+            return self.parent.parent
 
-        if real_parent.is2node() and self.isRightChild():
+    def getLeftSibling(self):
+        """
+        Geeft de linker sibling van de huidige rood-zwartknoop volgens de 2-3-4boom.
+        Als er geen linker sibling is dan wordt None terug gegeven.
+        :return: RBTNode object
+        """
+        twothreefour_parent = self.getTwoThreeFourParent()
+
+        if twothreefour_parent.is2node() and self.isRightChild():
             return self.parent.left
 
-        elif real_parent.is3node():
+        elif twothreefour_parent.is3node():
             if self.parent.color == "red" and self.isRightChild():
                 return self.parent.left
             elif self.parent.color == "red" and self.isLeftChild() and self.parent.isRightChild():
@@ -113,22 +134,24 @@ class RBTNode:
             elif self.parent.color == "black" and self.isRightChild():
                 return self.parent.left.right
 
-        elif real_parent.is4node():
+        elif twothreefour_parent.is4node():
             if self.isRightChild():
                 return self.parent.left
             elif self.isLeftChild() and self.parent.isRightChild():
                 return self.parent.parent.left.right
 
     def getRightSibling(self):
-        if self.parent.color == "black":
-            real_parent = self.parent
-        else:
-            real_parent = self.parent.parent
+        """
+        Geeft de rechter sibling van de huidige rood-zwartknoop volgens de 2-3-4boom.
+        Als er geen rechter sibling is dan wordt None terug gegeven.
+        :return: RBTNode object
+        """
+        twothreefour_parent = self.getTwoThreeFourParent()
 
-        if real_parent.is2node() and self.isLeftChild():
+        if twothreefour_parent.is2node() and self.isLeftChild():
             return self.parent.right
 
-        elif real_parent.is3node():
+        elif twothreefour_parent.is3node():
             if self.parent.color == "red" and self.isLeftChild():
                 return self.parent.right
             elif self.parent.color == "red" and self.isRightChild() and self.parent.isLeftChild():
@@ -136,7 +159,7 @@ class RBTNode:
             elif self.parent.color == "black" and self.isLeftChild():
                 return self.parent.right.left
 
-        elif real_parent.is4node():
+        elif twothreefour_parent.is4node():
             if self.isLeftChild():
                 return self.parent.right
             elif self.isRightChild() and self.parent.isLeftChild():
@@ -148,7 +171,7 @@ class RedBlackTree:
 
     def __init__(self):
         """
-        Creëer een lege rood-zwartboom.
+        Creëert een lege rood-zwartboom.
         """
         self.root = None
         self.count = 0
@@ -158,18 +181,18 @@ class RedBlackTree:
         """
         Laadt de rood-zwartboom uit een dictionary.
         :param RBTDict: dictionary
-        :return: BinarySearchTree object
+        :return: RedBlackTree object
         """
         if start:
             # Als de dictionary leeg is
             if RBTDict is None or RBTDict == {}:
                 return None
 
-            # Creëer een node in de root
+            # Creëer een knoop voor de wortel
             self.root = RBTNode()
             node = self.root
 
-        # Assign de waarden aan de node
+        # Wijs de waarden aan de knoop toe
         if 'root' in RBTDict:
             node.key = RBTDict.get('root')
         if 'value' in RBTDict:
@@ -177,10 +200,10 @@ class RedBlackTree:
         if 'color' in RBTDict:
             node.color = RBTDict.get('color')
 
-        # Voeg 1 toe aan het totaal aantal knopen in de binaire zoekboom
+        # Voeg 1 toe aan het totaal aantal knopen
         self.count += 1
 
-        # Kijk na of de node kinderen heeft
+        # Kijk of de knoop kinderen heeft
         if 'children' in RBTDict:
             if RBTDict['children'][0] is not None:
                 node.left = RBTNode()
@@ -202,18 +225,20 @@ class RedBlackTree:
     def save(self, addvalues=False, node=None, start=True):
         """
         Slaagt de rood-zwartboom op in een dictionary.
+        :param addvalues: boolean die bepaalt of dat the waarden ook opgeslagen moeten worden
         :return: dictionary
         """
+        RBTDict = {}
+
         if start:
-            # Als de binaire zoekboom leeg is
+            # Als de rood-zwartboom leeg is
             if self.root is None:
-                return {}
+                return RBTDict
+
             node = self.root
             self.save(addvalues, node, False)
 
-        RBTDict = {}
-
-        # Voeg de waarden van de node toe in de dictionary
+        # Voeg de waarden van de knoop toe aan de dictionary
         if node.key is not None:
             RBTDict['root'] = node.key
         else:
@@ -223,10 +248,9 @@ class RedBlackTree:
         if node.color is not None:
             RBTDict['color'] = node.color
 
-        # Als de node kinderen heeft
+        # Als de knoop kinderen heeft
         if not (node.left == self.NULLNode and node.right == self.NULLNode):
             RBTDict['children'] = []
-            # Save the children!
             for child in [node.left, node.right]:
                 if child != self.NULLNode:
                     RBTDict['children'].append(self.save(addvalues, child, False))
@@ -241,28 +265,29 @@ class RedBlackTree:
         :return: None
         """
         if start:
+            # Als de rood-zwartboom leeg is
             if self.root is None:
                 print(None)
                 return
             node = self.root
 
-        # Print de huidige node
+        # Print de huidige knoop
         if node.color == "black":
             print('%s' % ((depth * '\t') + "|B| " + str(node.key) + ": " + str(node.value)))
         else:
             print('%s' % ((depth * '\t') + "|R| " + str(node.key) + ": " + str(node.value)))
 
-        # Als beide kinderen None zijn dan return
+        # Als de knoop geen kinderen heeft
         if node.left == self.NULLNode and node.right == self.NULLNode:
             return
 
-        # Print linkerkind
+        # Print het linkerkind
         if node.left != self.NULLNode:
             self.print(depth + 1, node.left, False)
         else:
             print('%s' % (((depth + 1) * '\t') + "None"))
 
-        # Print rechterkind
+        # Print het rechterkind
         if node.right != self.NULLNode:
             self.print(depth + 1, node.right, False)
         else:
@@ -270,7 +295,7 @@ class RedBlackTree:
 
     def isEmpty(self):
         """
-        Bepaalt of de rood-zwartboom leeg is.
+        Kijkt of de rood-zwartboom leeg is.
         :return: boolean
         """
         if self.root is None:
@@ -283,13 +308,13 @@ class RedBlackTree:
         Geeft de hoogte van de rood-zwartboom.
         :return: integer, boolean
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 return 0
             current_node = self.root
 
-        # Geef 1 terug als de node geen kinderen heeft
+        # Geef 1 terug als de knoop geen kinderen heeft
         if current_node.left == self.NULLNode and current_node.right == self.NULLNode:
             return 1
 
@@ -306,7 +331,7 @@ class RedBlackTree:
                 if temp > max_height:
                     max_height = temp
 
-            # Geef 1 + de hoogte van langste pad onder node
+            # Geef 1 + de hoogte van langste pad vanaf een kind van de huidige knoop
             return 1 + max_height
 
     def getNumberOfNodes(self):
@@ -318,213 +343,71 @@ class RedBlackTree:
 
     def getRootData(self):
         """
-        Geeft de waarde dat in de root van de rood-zwartboom zit.
+        Geeft de waarde dat in de wortel van de rood-zwartboom zit.
         :return: value, boolean
         """
         return self.root.value
 
     def leftRotate(self, current_node):
-        A = current_node.right # A = child of self
-        B = current_node.parent # B = parent of self
-
+        """
+        Voert een leftrotate uit op een rood-zwartknoop.
+        :param current_node: knoop die wordt geroteerd
+        :return: None
+        """
         if current_node.parent is None:
-            self.root = A
+            self.root = current_node.right
 
-        if B is not None:
+        if current_node.parent is not None:
             if current_node.isLeftChild():
-                B.left = A
+                current_node.parent.left = current_node.right
             else:
-                B.right = A
-        A.parent = B
+                current_node.parent.right = current_node.right
 
-        current_node.parent = A
+        current_node.right.parent = current_node.parent
+        current_node.parent = current_node.right
 
-        temp = A.left
-        A.left = current_node
+        temp = current_node.right.left
+        current_node.right.left = current_node
         current_node.right = temp
         if temp is not None:
             current_node.right.parent = current_node
 
     def rightRotate(self, current_node):
-        A = current_node.left # A = child of self
-        B = current_node.parent # B = parent of self
-
+        """
+        Voert een rightrotate uit op een rood-zwartknoop.
+        :param current_node: knoop die wordt geroteerd
+        :return: None
+        """
         if current_node.parent is None:
-            self.root = A
+            self.root = current_node.left
 
-        if B is not None:
+        if current_node.parent is not None:
             if current_node.isLeftChild():
-                B.left = A
+                current_node.parent.left = current_node.left
             else:
-                B.right = A
-        A.parent = B
-        current_node.parent = A
+                current_node.parent.right = current_node.left
 
-        temp = A.right
-        A.right = current_node
+        current_node.left.parent = current_node.parent
+        current_node.parent = current_node.left
+
+        temp = current_node.left.right
+        current_node.left.right = current_node
         current_node.left = temp
         if temp is not None:
             current_node.left.parent = current_node
 
-    def case1(self, current_node):
-        temp = current_node.parent.parent
-        temp.left = current_node.parent.right
-        temp.left.parent = temp
-        greatgreatparent = current_node.parent.parent.parent
-        greatparent = current_node.parent.parent
-        if greatgreatparent is None:
-            current_node.parent.parent = None
-            self.root = current_node.parent
-        elif greatparent.isLeftChild():
-            greatgreatparent.left = current_node.parent
-            current_node.parent.parent = greatgreatparent
-        else:
-            greatgreatparent.right = current_node.parent
-            current_node.parent.parent = greatgreatparent
-        temp.parent = current_node.parent
-        current_node.parent.right = temp
-
-        current_node.parent.switchColor()
-        current_node.parent.right.switchColor()
-        current_node.colorChanges()
-
-    def case2(self, current_node):
-        temp = current_node.parent.parent
-        temp.right = current_node.parent.left
-        temp.right.parent = temp
-        greatgreatparent = current_node.parent.parent.parent
-        greatparent = current_node.parent.parent
-        if greatgreatparent is None:
-            current_node.parent.parent = None
-            self.root = current_node.parent
-        elif greatparent.isLeftChild():
-            greatgreatparent.left = current_node.parent
-            current_node.parent.parent = greatgreatparent
-        else:
-            greatgreatparent.right = current_node.parent
-            current_node.parent.parent = greatgreatparent
-        temp.parent = current_node.parent
-        current_node.parent.left = temp
-
-        current_node.parent.switchColor()
-        current_node.parent.left.switchColor()
-        current_node.colorChanges()
-
-    def case3(self, current_node):
-        tempchild1 = current_node.left
-        tempchild2 = current_node.right
-
-        greatgreatparent = current_node.parent.parent.parent
-        greatparent = current_node.parent.parent
-        parent = current_node.parent
-
-        if greatgreatparent is None:
-            current_node.parent = None
-            self.root = current_node
-        elif greatparent.isLeftChild():
-            greatgreatparent.left = current_node
-            current_node.parent = greatgreatparent
-        elif greatparent.isRightChild():
-            greatgreatparent.right = current_node
-            current_node.parent = greatgreatparent
-
-        current_node.left = greatparent
-        current_node.left.parent = current_node
-        current_node.left.right = tempchild1
-        current_node.left.right.parent = current_node.left
-
-        current_node.right = parent
-        current_node.right.parent = current_node
-        current_node.right.left = tempchild2
-        current_node.right.left.parent = current_node.right
-
-        tempchild1.switchColor()
-        tempchild2.switchColor()
-        current_node.left.switchColor()
-
-    def case4(self, current_node):
-        tempchild1 = current_node.left
-        tempchild2 = current_node.right
-
-        greatgreatparent = current_node.parent.parent.parent
-        greatparent = current_node.parent.parent
-        parent = current_node.parent
-
-        if greatgreatparent is None:
-            current_node.parent = None
-            self.root = current_node
-        elif greatparent.isLeftChild():
-            greatgreatparent.left = current_node
-            current_node.parent = greatgreatparent
-        elif greatparent.isRightChild():
-            greatgreatparent.right = current_node
-            current_node.parent = greatgreatparent
-
-        current_node.right = greatparent
-        current_node.right.parent = current_node
-        current_node.right.left = tempchild2
-        current_node.right.left.parent = current_node.right
-
-        current_node.left = parent
-        current_node.left.parent = current_node
-        current_node.left.right = tempchild1
-        current_node.left.right.parent = current_node.left
-
-        tempchild1.switchColor()
-        tempchild2.switchColor()
-        current_node.right.switchColor()
-
-    def split4node(self, current_node):
-        if current_node.parent is not None:
-            # Kijk naar de echte ouder
-            if current_node.parent.color == "black":
-                real_parent = current_node.parent
-            else:
-                real_parent = current_node.parent.parent
-
-        # Als de node de root is
-        if current_node == self.root:
-            current_node.left.switchColor()
-            current_node.right.switchColor()
-
-        # Als node zijn echte ouder een 2node is
-        elif real_parent.is2node():
-            current_node.colorChanges()
-
-        # Als node zijn echte ouder een 3node is
-        elif real_parent.is3node() and current_node.parent.color == "red":
-            # Als de ouder rood is moet die een rotatie doen
-
-            # Als current_node en ouder linkerkinderen zijn
-            if current_node.isLeftChild() and current_node.parent.isLeftChild():
-                self.case1(current_node)
-
-            # Als current_node en ouder rechterkinderen zijn
-            elif current_node.isRightChild() and current_node.parent.isRightChild():
-                self.case2(current_node)
-
-            # Als current_node linkerkind is en ouder rechterkind
-            elif current_node.isLeftChild() and current_node.parent.isRightChild():
-                self.case3(current_node)
-
-            # Als current_node rechterkind is en ouder linkerkind
-            elif current_node.isRightChild() and current_node.parent.isLeftChild():
-                self.case4(current_node)
-
-        elif real_parent.is3node() and current_node.parent.color == "black":
-            # Als de ouder niet rood is moed die color changes doen
-            current_node.colorChanges()
-
-    def insertItem(self, t, key=None, value=None, current_node=None, start=True):
+    def insertItem(self, TreeItem, key=None, value=None, current_node=None, start=True):
         """
         Voegt een nieuwe item toe aan de rood-zwartboom.
-        :param key: searchkey
+        :param key: search key (int of string)
         :param value: waarde
         :return: boolean
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin de current_node gelijk aan die van de wortel
         if start:
-            key, value = t[0], t[1]
+            # Pak TreeItem uit
+            key, value = TreeItem[0], TreeItem[1]
+
             # Als de boom leeg is
             if self.root is None:
                 self.root = RBTNode(key, value, "black")
@@ -533,14 +416,15 @@ class RedBlackTree:
 
                 self.count += 1
                 return True
+
             self.insertItem(None, key, value, self.root, False)
             return True
 
-        # Als de huidige node een 4node is, splits die dan
-        if current_node.is4node():
-            # Verschillende situaties
-            self.split4node(current_node)
+        # Splits de huidige knoop als die een 4-knoop is
+        if current_node.color == "black" and current_node.is4node():
+            self.split4Node(current_node)
 
+        # Als de te inserten key kleiner is dan de key van de huidige knoop en de huidige knoop is een blad
         if key < current_node.key and current_node.left == self.NULLNode:
             current_node.left = RBTNode(key, value, "red", parent=current_node)
             current_node.left.left = self.NULLNode
@@ -563,14 +447,13 @@ class RedBlackTree:
                     current_node.switchColor()
                     current_node.left.switchColor()
 
-                if current_node.parent is None:
-                    self.root = current_node
-
             return True
 
+        # Als de te inserten key kleiner is dan de key van de huidige knoop en de huidige knoop is geen blad
         elif key < current_node.key and current_node.left != self.NULLNode:
             self.insertItem(None, key, value, current_node.left, False)
 
+        # Als de te inserten key groter is dan de key van de huidige knoop en de huidige knoop is een blad
         elif key > current_node.key and current_node.right == self.NULLNode:
             current_node.right = RBTNode(key, value, "red", parent=current_node)
             current_node.right.left = self.NULLNode
@@ -594,17 +477,190 @@ class RedBlackTree:
 
             return True
 
+        # Als de te inserten key groter is dan de key van de huidige knoop en de huidige knoop is geen blad
         elif key > current_node.key and current_node.right != self.NULLNode:
             self.insertItem(None, key, value, current_node.right, False)
 
-    def leftredistribute(self, current_node):
-        if current_node.parent is not None:
-            # Kijk naar de echte ouder
-            if current_node.parent.color == "black":
-                real_parent = current_node.parent
-            else:
-                real_parent = current_node.parent.parent
+    def split4Node(self, current_node):
+        """
+        Hulpfunctue van insertItem. Splitst een 4-knoop op.
+        :param current_node: huidige knoop
+        :return: None
+        """
+        if current_node == self.root:
+            current_node.left.switchColor()
+            current_node.right.switchColor()
+            return
 
+        twothreefour_parent = current_node.getTwoThreeFourParent()
+
+        if twothreefour_parent.is2node():
+            current_node.colorChanges()
+
+        # Als de ouder rood is moet die rotaties doen
+        elif twothreefour_parent.is3node() and current_node.parent.color == "red":
+            # Als current_node en ouder linkerkinderen zijn
+            if current_node.isLeftChild() and current_node.parent.isLeftChild():
+                self.rightRotate(current_node.parent.parent)
+                current_node.parent.switchColor()
+                current_node.parent.right.switchColor()
+                current_node.colorChanges()
+
+            # Als current_node en ouder rechterkinderen zijn
+            elif current_node.isRightChild() and current_node.parent.isRightChild():
+                self.leftRotate(current_node.parent.parant)
+                current_node.parent.switchColor()
+                current_node.parent.left.switchColor()
+                current_node.colorChanges()
+
+            # Als current_node linkerkind is en ouder rechterkind
+            elif current_node.isLeftChild() and current_node.parent.isRightChild():
+                current_node.left.switchColor()
+                current_node.right.switchColor()
+                self.rightRotate(current_node.parent)
+                self.leftRotate(current_node.parent)
+                current_node.left.switchColor()
+
+            # Als current_node rechterkind is en ouder linkerkind
+            elif current_node.isRightChild() and current_node.parent.isLeftChild():
+                current_node.left.switchColor()
+                current_node.right.switchColor()
+                self.leftRotate(current_node.parent)
+                self.rightRotate(current_node.parent)
+                current_node.right.switchColor()
+
+        # Als de ouder niet rood is moed die color changes doen
+        elif twothreefour_parent.is3node() and current_node.parent.color == "black":
+            current_node.colorChanges()
+
+    def deleteItem(self, key):
+        """
+        Verwijdert de knoop dat het gegeven zoeksleutel bevat.
+        :param key: zoeksleutel
+        :return: boolean
+        """
+        # Kijk of dat de knoop bestaat in de boom
+        if not self.retrieveItem(key)[1]:
+            return False
+
+        # Zoek de knoop die het te verwijderen item bevat en
+        # vorm elke 2-knoop (behalve de wortel) op dit pad om tot een 3-knoop of een 4-knoop
+        if self.root.key == key:
+            if self.root.left == self.NULLNode and self.root.right == self.NULLNode:
+                self.root = None
+
+        node_to_delete = self.deleteSearchNode(key)
+        if node_to_delete is None:
+            return False
+
+        # Zoek de inorder successor van de knoop
+        inosuc = self.deleteSearchInorderSuccessor(node_to_delete)
+
+        # Verwissel de items van de knopen
+        node_to_delete.key = inosuc.key
+        node_to_delete.value = inosuc.value
+
+        # Verwijder de inorder successor
+        if inosuc.color == "red":
+            if inosuc.isLeftChild():
+                inosuc.parent.left = self.NULLNode
+            else:
+                inosuc.parent.right = self.NULLNode
+        else:
+            if inosuc.is3node():
+                if inosuc.left.color == "red":
+                    self.rightRotate(inosuc)
+                    inosuc.parent.switchColor()
+                    inosuc.parent.right = self.NULLNode
+                else:
+                    self.leftRotate(inosuc)
+                    inosuc.parent.switchColor()
+                    inosuc.parent.left = self.NULLNode
+            elif inosuc.is4node():
+                self.leftRotate(inosuc)
+                inosuc.parent.parent.switchColor()
+                inosuc.parent.left = self.NULLNode
+
+        self.count -= 1
+        return True
+
+    def deleteSearchNode(self, key, current_node=None, start=True):
+        """
+        Hulpfunctie van deleteItem. Zoekt de te verwijderen knoop en vormt elke 2-knoop (behalve de wortel) op
+        dit pad om tot een 3-knoop of een 4-knoop.
+        :return: RBTNode object
+        """
+        # Zet in het begin current_node gelijk aan die van de wortel
+        if start:
+            # Als de boom leeg is
+            if self.root is None:
+                return None
+            return self.deleteSearchNode(key, self.root, False)
+
+        # Herverdeel of merge als het een 2-knoop is
+        self.mergeOrRedistribute(current_node)
+
+        if key == current_node.key:
+            return current_node
+        elif key < current_node.key and current_node.left is not None:
+            if current_node.left == self.NULLNode:
+                return None
+            return self.deleteSearchNode(key, current_node.left, False)
+        elif key > current_node.key and current_node.right is not None:
+            if current_node.right == self.NULLNode:
+                return None
+            return self.deleteSearchNode(key, current_node.right, False)
+
+    def deleteSearchInorderSuccessor(self, current_node, left=False):
+        """
+        Hulpfunctie van deleteItem. Zoekt de inorder successor van de te verwijderen knoop en vormt elke
+        2-knoop (behalve de wortel) op dit pad om tot een 3-knoop of een 4-knoop.
+        :return: RBTNode object
+        """
+        # Herverdeel of merge als het een 2-knoop is
+        self.mergeOrRedistribute(current_node)
+
+        # Ga eerst 1 keer naar rechts
+        if not left:
+            if current_node.right != self.NULLNode:
+                return self.deleteSearchInorderSuccessor(current_node.right, True)
+            else:
+                return current_node
+        # Blijf links gaan tot een blad
+        else:
+            if current_node.left != self.NULLNode:
+                return self.deleteSearchInorderSuccessor(current_node.left, True)
+            else:
+                return current_node
+
+    def mergeOrRedistribute(self, current_node):
+        """
+        Hulpfunctie van deleteSearchNode en deleteSearchInorderSuccessor. Kijkt of dat de gegeven knoop een
+        2-knoop is en bepaald of dat er gemerged of gedeeld moet worden.
+        :return: None
+        """
+        # Als de node een 2node is en die is geen root
+        if current_node != self.root and current_node.color == "black" and current_node.is2node():
+            # Kijk of dat de linkersibling iets kan uitlenen en redistribute
+            left_sibling = current_node.getLeftSibling()
+            right_sibling = current_node.getRightSibling()
+            if left_sibling is not None and (left_sibling.is3node() or left_sibling.is4node()):
+                self.leftredistribute(current_node)
+
+            # Kijk of dat de rechtersibling iets kan uitlenen en redistribute
+            elif right_sibling is not None and (right_sibling.is3node() or right_sibling.is4node()):
+                self.rightredistribute(current_node)
+
+            # Anders merge met linkersibling (of rechtersibling als waarde meest rechtse is volgens 234boom)
+            else:
+                self.merge2node(current_node)
+
+    def leftredistribute(self, current_node):
+        """
+        Hulpfunctie van mergeOrRedistribute. Herverdeelt en zorgt ervoor dat de huidige knoop geen 2-knoop meer is.
+        :return: None
+        """
+        twothreefour_parent = current_node.getTwoThreeFourParent()
         left_sibling = current_node.getLeftSibling()
 
         if left_sibling.is3node():
@@ -613,33 +669,30 @@ class RedBlackTree:
                 left_sibling.switchColor()
                 left_sibling.parent.switchColor()
                 left_sibling = left_sibling.parent
-                # nu moet S left sibling zijn
         else:
             self.leftRotate(left_sibling)
             left_sibling.switchColor()
             left_sibling.parent.switchColor()
             left_sibling = left_sibling.parent
 
-        # Als echte ouder 2node is
-        if real_parent.is2node():
+        if twothreefour_parent.is2node():
             self.rightRotate(current_node.parent)
             current_node.switchColor()
             current_node.parent.parent.left.switchColor()
 
-        # Als echte ouder 3node is
-        elif real_parent.is3node():
-            if current_node == real_parent.right.right:
+        elif twothreefour_parent.is3node():
+            if current_node == twothreefour_parent.right.right:
                 self.rightRotate(current_node.parent)
                 current_node.parent.parent.colorChanges()
                 current_node.switchColor()
 
-            elif current_node == real_parent.right:
+            elif current_node == twothreefour_parent.right:
                 self.leftRotate(current_node.parent.left)
                 self.rightRotate(current_node.parent)
                 current_node.switchColor()
                 current_node.parent.parent.left.right.switchColor()
 
-            elif current_node == real_parent.right.left:
+            elif current_node == twothreefour_parent.right.left:
                 current_node.parent.switchColor()
                 self.leftRotate(current_node.parent.parent)
                 current_node.parent.left.switchColor()
@@ -647,15 +700,14 @@ class RedBlackTree:
                 self.rightRotate(current_node.parent)
                 current_node.switchColor()
 
-            elif current_node == real_parent.left.right:
+            elif current_node == twothreefour_parent.left.right:
                 current_node.parent.switchColor()
                 current_node.parent.left.switchColor()
                 current_node.parent.left.left.switchColor()
                 self.rightRotate(current_node.parent)
                 current_node.switchColor()
 
-        # Als echte ouder 4node is
-        elif real_parent.is4node():
+        elif twothreefour_parent.is4node():
             if current_node.isRightChild():
                 self.rightRotate(current_node.parent)
                 current_node.switchColor()
@@ -670,13 +722,11 @@ class RedBlackTree:
                 current_node.parent.parent.parent.left.right.switchColor()
 
     def rightredistribute(self, current_node):
-        if current_node.parent is not None:
-            # Kijk naar de echte ouder
-            if current_node.parent.color == "black":
-                real_parent = current_node.parent
-            else:
-                real_parent = current_node.parent.parent
-
+        """
+        Hulpfunctie van mergeOrRedistribute. Herverdeelt en zorgt ervoor dat de huidige knoop geen 2-knoop meer is.
+        :return: None
+        """
+        twothreefour_parent = current_node.getTwoThreeFourParent()
         right_sibling = current_node.getRightSibling()
 
         if right_sibling.is3node():
@@ -685,33 +735,30 @@ class RedBlackTree:
                 right_sibling.switchColor()
                 right_sibling.parent.switchColor()
                 right_sibling = right_sibling.parent
-                # Nu moet S left sibling zijn
         else:
             self.rightRotate(right_sibling)
             right_sibling.switchColor()
             right_sibling.parent.switchColor()
             right_sibling = right_sibling.parent
 
-        # Als echte ouder 2node is
-        if real_parent.is2node():
+        if twothreefour_parent.is2node():
             self.leftRotate(current_node.parent)
             current_node.switchColor()
             current_node.parent.parent.right.switchColor()
 
-        # Als echte ouder 3node is
-        elif real_parent.is3node():
-            if current_node == real_parent.left.left:
+        elif twothreefour_parent.is3node():
+            if current_node == twothreefour_parent.left.left:
                 self.leftRotate(current_node.parent)
                 current_node.parent.parent.colorChanges()
                 current_node.switchColor()
 
-            elif current_node == real_parent.left:
+            elif current_node == twothreefour_parent.left:
                 self.rightRotate(current_node.parent.right)
                 self.leftRotate(current_node.parent)
                 current_node.switchColor()
                 current_node.parent.parent.right.left.switchColor()
 
-            elif current_node == real_parent.left.right:
+            elif current_node == twothreefour_parent.left.right:
                 current_node.parent.switchColor()
                 self.rightRotate(current_node.parent.parent)
                 current_node.parent.right.switchColor()
@@ -719,15 +766,14 @@ class RedBlackTree:
                 self.leftRotate(current_node.parent)
                 current_node.switchColor()
 
-            elif current_node == real_parent.right.left:
+            elif current_node == twothreefour_parent.right.left:
                 current_node.parent.switchColor()
                 current_node.parent.right.switchColor()
                 current_node.parent.right.right.switchColor()
                 self.leftRotate(current_node.parent)
                 current_node.switchColor()
 
-        # Als echte ouder 4node is
-        elif real_parent.is4node():
+        elif twothreefour_parent.is4node():
             if current_node.isLeftChild():
                 self.leftRotate(current_node.parent)
                 current_node.switchColor()
@@ -742,15 +788,14 @@ class RedBlackTree:
                 current_node.parent.parent.parent.right.left.switchColor()
 
     def merge2node(self, current_node):
-        if current_node.parent is not None:
-            # Kijk naar de echte ouder
-            if current_node.parent.color == "black":
-                real_parent = current_node.parent
-            else:
-                real_parent = current_node.parent.parent
+        """
+        Hulpfunctie van mergeOrRedistribute. Merged de 2-knoop met zijn sibling en een item van de ouder (volgens
+        de 234boom).
+        :return: None
+        """
+        twothreefour_parent = current_node.getTwoThreeFourParent()
 
-        # Als de ouder 2node is
-        if real_parent.is2node():
+        if twothreefour_parent.is2node():
             # Doe een colorswitch
             current_node.switchColor()
             if current_node.isLeftChild():
@@ -758,8 +803,7 @@ class RedBlackTree:
             else:
                 current_node.parent.left.switchColor()
 
-        # Als de ouder 3node is
-        elif real_parent.is3node():
+        elif twothreefour_parent.is3node():
             left_sibling = current_node.getLeftSibling()
             if left_sibling is not None:
                 if current_node.isRightChild() and left_sibling.isLeftChild():
@@ -787,8 +831,7 @@ class RedBlackTree:
                     current_node.parent.right.switchColor()
                     current_node.parent.parent.switchColor()
 
-        # Als de ouder 4node is
-        elif real_parent.is4node():
+        elif twothreefour_parent.is4node():
             left_sibling = current_node.getLeftSibling()
             if left_sibling is not None:
                 if current_node.isRightChild():
@@ -801,117 +844,7 @@ class RedBlackTree:
                     current_node.parent.left.switchColor()
                     current_node.parent.parent.parent.switchColor()
             else:
-                # Merge met de right sibling
                 current_node.parent.colorChanges()
-
-    def mergeOrRedistribute(self, current_node):
-        # Als de node een 2node is en die is geen root
-        if current_node != self.root and current_node.color == "black" and current_node.is2node():
-            # Kijk of dat de linkersibling iets kan uitlenen
-            # en dan redistribute
-            left_sibling = current_node.getLeftSibling()
-            right_sibling = current_node.getRightSibling()
-            if left_sibling is not None and (left_sibling.is3node() or left_sibling.is4node()):
-                self.leftredistribute(current_node)
-
-            # Kijk of dat de rechtersibling iets kan uitlenen
-            # en dan redistribute
-            elif right_sibling is not None and (right_sibling.is3node() or right_sibling.is4node()):
-                self.rightredistribute(current_node)
-
-            # Anders merge met linkersibling (of rechtersibling als waarde meest rechtse is)
-            else:
-                self.merge2node(current_node)
-
-    def deleteSearchNode(self, key, current_node=None, start=True):
-        # Zet in het begin de current_node gelijk aan die van de root
-        if start:
-            # Als de boom leeg is
-            if self.root is None:
-                return None
-            return self.deleteSearchNode(key, self.root, False)
-
-        self.mergeOrRedistribute(current_node)
-
-        if key == current_node.key:
-            return current_node
-        elif key < current_node.key and current_node.left is not None:
-            if current_node.left == self.NULLNode:
-                return None
-            return self.deleteSearchNode(key, current_node.left, False)
-        elif key > current_node.key and current_node.right is not None:
-            if current_node.right == self.NULLNode:
-                return None
-            return self.deleteSearchNode(key, current_node.right, False)
-        else:
-            return None
-
-    def deleteSearchInorderSuccessor(self, current_node, left=False):
-        # Herverdeel of merge als het een 2node is
-        self.mergeOrRedistribute(current_node)
-
-        # Ga eerst 1 keer naar rechts
-        if not left:
-            if current_node.right != self.NULLNode:
-                return self.deleteSearchInorderSuccessor(current_node.right, True)
-            else:
-                return current_node
-        # Blijf links gaan tot een blad
-        else:
-            if current_node.left != self.NULLNode:
-                return self.deleteSearchInorderSuccessor(current_node.left, True)
-            else:
-                return current_node
-
-    def deleteItem(self, key):
-        """
-        Verwijdert de node dat het gegeven key bevat.
-        :return: boolean
-        """
-        # Kijk of dat de node bestaat in de boom
-        if not self.retrieveItem(key)[1]:
-            return False
-
-        # Zoek de node die het te verwijderen item bevat en
-        # vorm elke 2-knoop (behalve de wortel) op dit pad om tot 3-knoop of een 4-knoop
-        if self.root.key == key:
-            if self.root.left == self.NULLNode and self.root.right == self.NULLNode:
-                self.root = None
-
-        delete_node = self.deleteSearchNode(key)
-        if delete_node is None:
-            return False
-
-        # Zoek de inorder successor van de node
-        inosuc = self.deleteSearchInorderSuccessor(delete_node)
-
-        # Swap de items van de nodes
-        delete_node.key = inosuc.key
-        delete_node.value = inosuc.value
-
-        # verwijder inorder successor
-        if inosuc.color == "red":
-            if inosuc.isLeftChild():
-                inosuc.parent.left = self.NULLNode
-            else:
-                inosuc.parent.right = self.NULLNode
-        else:
-            if inosuc.is3node():
-                if inosuc.left.color == "red":
-                    self.rightRotate(inosuc)
-                    inosuc.parent.switchColor()
-                    inosuc.parent.right = self.NULLNode
-                else:
-                    self.leftRotate(inosuc)
-                    inosuc.parent.switchColor()
-                    inosuc.parent.left = self.NULLNode
-            elif inosuc.is4node():
-                self.leftRotate(inosuc)
-                inosuc.parent.parent.switchColor()
-                inosuc.parent.left = self.NULLNode
-
-        self.count -= 1
-        return True
 
     def clear(self):
         """
@@ -922,17 +855,16 @@ class RedBlackTree:
 
     def getNode(self, key, current_node=None, start=True):
         """
-        Geeft de node terug die de search key bevat.
+        Geeft de knoop terug die de zoeksleutel bevat.
         :param key: search key (int of string)
         :return: waarde
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 return
             current_node = self.root
 
-        # return de node als de key van de node gelijk is aan de gegeven key
         if current_node.key == key:
             return current_node
 
@@ -964,7 +896,7 @@ class RedBlackTree:
 
     def contains(self, data, node=None, start=True):
         """
-        Bepaalt of dat de gegeven waarde in de boom zit.
+        Kijkt of dat de gegeven waarde in de boom zit.
         :param data: waarde
         :return: boolean
         """
@@ -993,94 +925,94 @@ class RedBlackTree:
 
     def preorderTraverse(self, FunctionType, current_node=None, start=True):
         """
-        Doorloopt de knopen in de rood-zwartboom in preorder.
+        Doorloopt de knopen in de rood-zwartboom in preorder volgorde.
         :return: None
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 print(None)
                 return
             current_node = self.root
 
-        # Print de searchkey van de huidige node
+        # Print de searchkey van de huidige knoop
         FunctionType(current_node.key)
 
-        # Doorloop de linkerdeelboom van de node
+        # Doorloop de linkerdeelboom van de knoop
         if current_node.left != self.NULLNode:
             self.preorderTraverse(FunctionType, current_node.left, False)
 
-        # Doorloop de rechterdeelboom van de node
+        # Doorloop de rechterdeelboom van de knoop
         if current_node.right != self.NULLNode:
             self.preorderTraverse(FunctionType, current_node.right, False)
 
     def inorderTraverse(self, FunctionType, current_node=None, start=True):
         """
-        Doorloopt de knopen in de rood-zwartboom in inorder.
+        Doorloopt de knopen in de rood-zwartboom in inorder volgorde.
         :return: None
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 print(None)
                 return
             current_node = self.root
 
-        # Doorloop de linkerdeelboom van de node
+        # Doorloop de linkerdeelboom van de knoop
         if current_node.left != self.NULLNode:
             self.inorderTraverse(FunctionType, current_node.left, False)
 
-        # Print de searchkey van de huidige node
+        # Print de searchkey van de huidige knoop
         FunctionType(current_node.key)
 
-        # Doorloop de rechterdeelboom van de node
+        # Doorloop de rechterdeelboom van de knoop
         if current_node.right != self.NULLNode:
             self.inorderTraverse(FunctionType, current_node.right, False)
 
     def postorderTraverse(self, FunctionType, current_node=None, start=True):
         """
-        Doorloopt de knopen in de rood-zwartboom in postorder.
+        Doorloopt de knopen in de rood-zwartboom in postorder volgorde.
         :return: None
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 print(None)
                 return
             current_node = self.root
 
-        # Doorloop de linkerdeelboom van de node
+        # Doorloop de linkerdeelboom van de knoop
         if current_node.left != self.NULLNode:
             self.postorderTraverse(FunctionType, current_node.left, False)
 
-        # Doorloop de rechterdeelboom van de node
+        # Doorloop de rechterdeelboom van de knoop
         if current_node.right != self.NULLNode:
             self.postorderTraverse(FunctionType, current_node.right, False)
 
-        # Print de searchkey van de huidige node
+        # Print de searchkey van de huidige knoop
         FunctionType(current_node.key)
 
     def check(self, current_node=None, start=True):
         """
-        Kijkt na of dat de rood-zwartboom correct is
+        Controleert of dat de rood-zwartboom correct is.
         :return: Aantal zwarte knopen op 1 pad
         """
-        # Zet in het begin de current_node gelijk aan die van de root
+        # Zet in het begin de current_node gelijk aan die van de wortel
         if start:
             if self.root is None:
                 print("---De boom is leeg---")
                 return
             current_node = self.root
-            # Check of dat de kleur van de root zwart is
+            # Kijk of dat de kleur van de root zwart is
             if current_node.color != "black":
                 print("---Root is rood!---")
 
-            # Check of dat de root geen ouder heeft
+            # Kijk of dat de wortel geen ouder heeft
             if current_node.parent is not None:
                 print("---Root heeft een ouder!---")
 
         else:
-            # Kijk na of dat de node een ouder heeft
+            # Kijk na of dat current_node een ouder heeft
             if current_node.parent is None or current_node.parent == self.NULLNode:
                 print(f"---{current_node.key} heeft geen ouder!---")
             else:
@@ -1152,7 +1084,7 @@ class RedBlackTree:
             dot.edge(str(current_node.key)+":se", str(current_node.right.key))
 
         if start:
-            # Slaag de rood-zwartboom op en geef die weer als gevraagt is
+            # Slaag de rood-zwartboom op en geef die weer als gevraagd is
             dot.render(f'test-output/{name}.gv', view=v)
 
 
@@ -1187,20 +1119,109 @@ if __name__ == "__main__":
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-    # boom = RedBlackTree()
-    # l = list(range(0, 40))
+    boom = RedBlackTree()
+
+    # l = list(range(0, 50))
     # shuffle(l)
-    # print(l)
-    # # l2 = [7, 15, 19, 10, 17, 18, 14, 16, 8, 13, 9, 12, 5, 1, 11, 0, 6, 4, 2, 3]
-    # # l = [10, 49, 14, 30, 34, 25, 23, 36, 11, 5, 32, 41, 28, 19, 46, 6, 0, 13, 43, 26, 40, 2, 9, 47, 45, 39, 1, 12, 22, 38, 17, 18, 42, 35, 15, 29, 31, 27, 48, 33, 24, 37, 3, 16, 7, 20, 44, 8, 4, 21]
-    # for i in l:
-    #     item = createTreeItem(i)
-    #     boom.insertItem(item)
-    #     boom.toDot()
-    #     # print(f"{i} has been inserted")
-    #     # boom.check()
+    l = [37, 40, 8, 46, 42, 36, 18, 25, 47, 33, 45, 28, 39, 12, 9, 38, 24, 2, 15, 34, 30, 29, 44, 1, 5, 3, 23, 19, 43, 4, 17, 22, 49, 48, 16, 21, 13, 41, 27, 35, 26, 14]
+    print(l)
+    start = time.time()
+    for i in l:
+        item = createTreeItem(i)
+        boom.insertItem(item)
+        # boom.toDot()
+        # print(f"{i} has been inserted")
+        # boom.check()
+
+    # boom.toDot(False)
+    # boom.deleteItem(2)
+    # boom.deleteItem(37)
+    # boom.deleteItem(17)
+    # boom.deleteItem(43)
+    # boom.deleteItem(2)
+    # boom.toDot(False)
+    # boom.insertItem(createTreeItem(37, None))
+    # boom.insertItem(createTreeItem(17, None))
+
+    boom.toDot(True)
+
+    print(time.time() - start)
+
+    # # Demo12 splitsen van 4-knoop met 3-knoop ouder case 3
     #
+    # d10 = {'root': 13, 'color': "black", 'children': [
+    #         {'root': 6, 'color': "black", 'children': [
+    #             None,
+    #             {'root': 9, 'color': "red"}
+    #         ]},
+    #         {'root': 23, 'color': "red", 'children': [
+    #             {'root': 15, 'color': "black", 'children': [
+    #                 {'root': 14, 'color': "red"},
+    #                 {'root': 18, 'color': "red"}
+    #             ]},
+    #             {'root': 24, 'color': "black"}
+    #     ]}
+    # ]}
+    #
+    # boom.load(d10)
+    # boom.toDot()
+    # boom.split4Node(boom.root.right.left)
     # boom.toDot(True)
+
+
+    # t = RedBlackTree()
+    # start = time.time()
+    # t.insertItem(createTreeItem(3, 3))
+    # t.insertItem(createTreeItem(5, 5))
+    # t.insertItem(createTreeItem(10, 10))
+    # t.insertItem(createTreeItem(2, 2))
+    # t.insertItem(createTreeItem(4, 4))
+    # t.insertItem(createTreeItem(56, 56))
+    # t.insertItem(createTreeItem(70, 70))
+    # t.insertItem(createTreeItem(30, 30))
+    # t.insertItem(createTreeItem(20, 20))
+    # t.insertItem(createTreeItem(67, 67))
+    # t.insertItem(createTreeItem(99, 99))
+    # t.insertItem(createTreeItem(7, 7))
+    # t.insertItem(createTreeItem(53, 53))
+    # t.insertItem(createTreeItem(78, 78))
+    # t.insertItem(createTreeItem(102, 102))
+    # t.insertItem(createTreeItem(342, 342))
+    # t.insertItem(createTreeItem(43, 43))
+    # t.insertItem(createTreeItem(22, 22))
+    # t.insertItem(createTreeItem(234, 234))
+    # t.insertItem(createTreeItem(555, 555))
+    # t.insertItem(createTreeItem(301, 301))
+    # t.insertItem(createTreeItem(279, 279))
+    # t.insertItem(createTreeItem(443, 443))
+    # t.insertItem(createTreeItem(126, 126))
+    # t.insertItem(createTreeItem(232, 232))
+    # t.insertItem(createTreeItem(912, 912))
+    # t.insertItem(createTreeItem(761, 761))
+    # t.insertItem(createTreeItem(320, 320))
+    # t.insertItem(createTreeItem(215, 215))
+    # t.insertItem(createTreeItem(878, 878))
+    # t.insertItem(createTreeItem(701, 701))
+    # t.insertItem(createTreeItem(488, 488))
+    # t.insertItem(createTreeItem(436, 436))
+    # t.insertItem(createTreeItem(363, 363))
+    # t.insertItem(createTreeItem(688, 688))
+    # t.insertItem(createTreeItem(941, 941))
+    # t.insertItem(createTreeItem(533, 533))
+    # print(time.time() - start)
+    # print(t.save())
+    #
+    # t.toDot(True)
+    #
+    # other = {'root': 70, 'color': 'black', 'children': [{'root': 20, 'color': 'black', 'children': [{'root': 5, 'color': 'black', 'children': [{'root': 3, 'color': 'black', 'children': [{'root': 2, 'color': 'red'}, {'root': 4, 'color': 'red'}]}, {'root': 10, 'color': 'black', 'children': [{'root': 7, 'color': 'red'}, None]}]}, {'root': 56, 'color': 'black', 'children': [{'root': 43, 'color': 'red', 'children': [{'root': 30, 'color': 'black', 'children': [{'root': 22, 'color': 'red'}, None]}, {'root': 53, 'color': 'black'}]}, {'root': 67, 'color': 'black'}]}]}, {'root': 234, 'color': 'black', 'children': [{'root': 99, 'color': 'black', 'children': [{'root': 78, 'color': 'black'}, {'root': 126, 'color': 'red', 'children': [{'root': 102, 'color': 'black'}, {'root': 232, 'color': 'black', 'children': [{'root': 215, 'color': 'red'}, None]}]}]}, {'root': 555, 'color': 'red', 'children': [{'root': 342, 'color': 'black', 'children': [{'root': 301, 'color': 'black', 'children': [{'root': 279, 'color': 'red'}, {'root': 320, 'color': 'red'}]}, {'root': 443, 'color': 'red', 'children': [{'root': 436, 'color': 'black', 'children': [{'root': 363, 'color': 'red'}, None]}, {'root': 488, 'color': 'black', 'children': [None, {'root': 533, 'color': 'red'}]}]}]}, {'root': 878, 'color': 'black', 'children': [{'root': 701, 'color': 'black', 'children': [{'root': 688, 'color': 'red'}, {'root': 761, 'color': 'red'}]}, {'root': 912, 'color': 'black', 'children': [None, {'root': 941, 'color': 'red'}]}]}]}]}]}
+    #
+    # if t.save() == other:
+    #     print("yes")
+    # else:
+    #     print("no")
+
+    # 0.00013756752014160156
+
     #
     #
     #
