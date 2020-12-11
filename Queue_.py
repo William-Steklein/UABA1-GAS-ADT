@@ -116,21 +116,38 @@ class Queue:
         else:
             return None, False
 
-        # Maak de volgende van de front de front
-        self.front = self.front.next
+        # Als er 1 item in de queue zit
+        if self.getLength() == 1:
+            self.front = None
+            self.back = None
+        else:
+            # Maak de volgende van de front de front
+            self.front = self.front.next
 
         return value, True
 
     def getFront(self):
         """
         Vraagt het eerst toegevoegde element uit de queue op.
-
         :return: het eerst toegevoegde element
         """
         if self.front is not None:
             return self.front.value, True
         else:
             return None, False
+
+    def getLength(self):
+        """
+        Geeft de lengte van de queue terug
+        :return: lengte van de queue (int)
+        """
+        count = 1
+        current_node = self.front
+        while current_node != self.back:
+            count += 1
+            current_node = current_node.next
+
+        return count
 
 if __name__ == "__main__":
     q = Queue()
@@ -150,3 +167,6 @@ if __name__ == "__main__":
     print(q.save())
     print(q.getFront()[0])
     print(q.save())
+    print(q.dequeue())
+    print(q.dequeue())
+    print(q.dequeue())
