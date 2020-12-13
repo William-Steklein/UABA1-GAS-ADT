@@ -67,15 +67,13 @@ class BSTTable:
         """
         return self.BST.searchTreeRetrieve(searchKey)
 
-    def traverseTable(self, FunctionType):
+    def traverseTable(self, FunctionType=print):
         """
         Doorloopt alle items in de tabel.
         :param FunctionType: functie dat toegepast wordt op de items van de tabel
         :return: None
         """
-        l = self.BST.traverse()
-        for i in l:
-            FunctionType(i)
+        self.BST.inorderTraverse(FunctionType)
 
 if __name__ == "__main__":
     t = BSTTable()

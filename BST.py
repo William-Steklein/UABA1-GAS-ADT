@@ -418,7 +418,7 @@ class BST:
         """
         self.root = None
 
-    def preorderTraverse(self, current_node=None, start=True):
+    def preorderTraverse(self, FunctionType=print, current_node=None, start=True):
         """
         Doorloopt de knopen in de binaire zoekboom in preorder volgorde.
         :return: None
@@ -431,17 +431,17 @@ class BST:
             current_node = self.root
 
         # Print de searchkey van de huidige knoop
-        print(current_node.key)
+        FunctionType(current_node.key)
 
         # Doorloop de linkerdeelboom van de knoop
         if current_node.left is not None:
-            self.preorderTraverse(current_node.left, False)
+            self.preorderTraverse(FunctionType, current_node.left, False)
 
         # Doorloop de rechterdeelboom van de knoop
         if current_node.right is not None:
-            self.preorderTraverse(current_node.right, False)
+            self.preorderTraverse(FunctionType, current_node.right, False)
 
-    def inorderTraverse(self, current_node=None, start=True):
+    def inorderTraverse(self, FunctionType=print, current_node=None, start=True):
         """
         Doorloopt de knopen in de binaire zoekboom in inorder volgorde.
         :return: None
@@ -455,16 +455,16 @@ class BST:
 
         # Doorloop de linkerdeelboom van de knoop
         if current_node.left is not None:
-            self.inorderTraverse(current_node.left, False)
+            self.inorderTraverse(FunctionType, current_node.left, False)
 
         # Print de searchkey van de huidige knoop
-        print(current_node.key)
+        FunctionType(current_node.key)
 
         # Doorloop de rechterdeelboom van de knoop
         if current_node.right is not None:
-            self.inorderTraverse(current_node.right, False)
+            self.inorderTraverse(FunctionType, current_node.right, False)
 
-    def postorderTraverse(self, current_node=None, start=True):
+    def postorderTraverse(self, FunctionType, current_node=None, start=True):
         """
         Doorloopt de knopen in de binaire zoekboom in postorder volgorde.
         :return: None
@@ -478,39 +478,14 @@ class BST:
 
         # Doorloop de linkerdeelboom van de knoop
         if current_node.left is not None:
-            self.postorderTraverse(current_node.left, False)
+            self.postorderTraverse(FunctionType, current_node.left, False)
 
         # Doorloop de rechterdeelboom van de knoop
         if current_node.right is not None:
-            self.postorderTraverse(current_node.right, False)
+            self.postorderTraverse(FunctionType, current_node.right, False)
 
         # Print de searchkey van de huidige knoop
-        print(current_node.key)
-
-    def traverse(self, current_node=None, start=True):
-        """
-        Doorloopt de knopen in de binaire zoekboom en geeft een lijst terug.
-        :return:
-        """
-        # Zet in het begin de current_node gelijk aan die van de wortel
-        if start:
-            if self.root is None:
-                return []
-            current_node = self.root
-        l = []
-
-        # Doorloop de linkerdeelboom van de knoop
-        if current_node.left is not None:
-            l += self.traverse(current_node.left, False)
-
-        # Print de searchkey van de huidige knoop
-        l.append(current_node.key)
-
-        # Doorloop de rechterdeelboom van de knoop
-        if current_node.right is not None:
-            l += self.traverse(current_node.right, False)
-
-        return l
+        FunctionType(current_node.key)
 
     def toDot(self, print_value=False, current_node=None, dot=None, start=True):
         """
@@ -551,47 +526,47 @@ class BST:
 
 
 # Testing
-if __name__ == "__main__":
-    d = {'root': 14, 'value': "test", 'children': [
-            {'root': 7, 'children': [
-                {'root': 5},
-                {'root': 9, 'value': "test2"}
-            ]},
-            {'root': 21, 'children': [
-                {'root': 16, 'children': [
-                    None,
-                    {'root': 17}
-                ]},
-                {'root': 23}]}
-        ]}
-
-    boom = BST()
-    boom.load(d)
-    print(boom.traverse())
-
-    # for i in range(25, 31):
-    #     boom.searchTreeInsert(createTreeItem(i, "new"))
-
-    boom.searchTreeDelete(27)
-    boom.searchTreeInsert(createTreeItem(27))
-
-    boom.clear()
-    boom.toDot()
-
-# # Inginious testing
 # if __name__ == "__main__":
-#     t = BST()
-#     print(t.isEmpty())
-#     print(t.searchTreeInsert(createTreeItem(8,8)))
-#     print(t.searchTreeInsert(createTreeItem(5,5)))
-#     print(t.isEmpty())
-#     print(t.searchTreeRetrieve(5)[0])
-#     print(t.searchTreeRetrieve(5)[1])
-#     t.inorderTraverse(print)
-#     print(t.save())
-#     t.load({'root': 10,'children':[{'root':5},None]})
-#     t.searchTreeInsert(createTreeItem(15,15))
-#     print(t.searchTreeDelete(0))
-#     print(t.save())
-#     print(t.searchTreeDelete(10))
-#     print(t.save())
+#     d = {'root': 14, 'value': "test", 'children': [
+#             {'root': 7, 'children': [
+#                 {'root': 5},
+#                 {'root': 9, 'value': "test2"}
+#             ]},
+#             {'root': 21, 'children': [
+#                 {'root': 16, 'children': [
+#                     None,
+#                     {'root': 17}
+#                 ]},
+#                 {'root': 23}]}
+#         ]}
+#
+#     boom = BST()
+#     boom.load(d)
+#     print(boom.traverse())
+#
+#     # for i in range(25, 31):
+#     #     boom.searchTreeInsert(createTreeItem(i, "new"))
+#
+#     boom.searchTreeDelete(27)
+#     boom.searchTreeInsert(createTreeItem(27))
+#
+#     boom.clear()
+#     boom.toDot()
+
+# Inginious testing
+if __name__ == "__main__":
+    t = BST()
+    print(t.isEmpty())
+    print(t.searchTreeInsert(createTreeItem(8,8)))
+    print(t.searchTreeInsert(createTreeItem(5,5)))
+    print(t.isEmpty())
+    print(t.searchTreeRetrieve(5)[0])
+    print(t.searchTreeRetrieve(5)[1])
+    t.inorderTraverse(print)
+    print(t.save())
+    t.load({'root': 10,'children':[{'root':5},None]})
+    t.searchTreeInsert(createTreeItem(15,15))
+    print(t.searchTreeDelete(0))
+    print(t.save())
+    print(t.searchTreeDelete(10))
+    print(t.save())
